@@ -1,0 +1,1031 @@
+/* ==========================================================================
+   TABLE OF CONTENTS
+   ==========================================================================
+   1. ROOT VARIABLES
+   2. GLOBAL RESET & BASE STYLES
+      - HTML, Body
+      - Links
+   3. GENERAL LAYOUT & COMPONENTS
+      - Header (Default)
+      - Logo
+      - Navigation
+      - Footer (Default)
+      - Card Base Styles (Shared by Service/Work cards)
+   4. HOMEPAGE SPECIFIC STYLES
+      - Body.home Layout
+      - Typewriter Animation
+      - Dot Animation Canvas
+      - Header (Homepage Variant)
+      - Footer (Homepage Variant)
+      - Danger Zone Link (on Homepage)
+   5. ABOUT PAGE STYLES
+      - Body.about Base
+      - Bio Section
+      - Research Section
+      - Publications Section
+   6. SERVICES PAGE STYLES
+      - Body.services Base
+      - Full Screen Layout Utility
+      - Services Intro Section
+      - Service Cards
+      - Consultation Button
+      - My Work Section
+      - Work Cards
+      - Scrollbar Fix (My Work Section)
+   7. DANGER ZONE PAGE STYLES
+      - Body.page-danger-zone Base
+      - Header (Danger Zone Variant)
+      - Content Area
+      - Danger Items (e.g., algorithm entries)
+      - Image Wrappers & Overlays
+   8. RESPONSIVE ADJUSTMENTS
+      - @media (max-width: 992px)
+      - @media (max-width: 768px)
+      - @media (max-width: 500px)
+   ========================================================================== */
+
+/* ==========================================================================
+   1. ROOT VARIABLES
+   ========================================================================== */
+:root {
+  --violet: #7d3cff; /* Main purple from target "Say Hi" and "Download CV" */
+  --accent: #6247ea; /* Slightly darker purple for hover, or other accents */
+  /* --highlight: #c5ff7e; removed */
+  --bg-dark: #232329; /* Dark background for research section */
+  --text-main: #22223b; /* Main dark text for light backgrounds */
+  --text-light: #fff; /* Light text for dark backgrounds */
+  --text-secondary: #545454; /* Secondary text color (e.g., bio role, card paragraph) */
+  --font-main: 'Inter', 'Fira Mono', 'Consolas', monospace;
+  --font-title: 'Poppins', 'Inter', sans-serif;
+  --card-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Consistent shadow for cards */
+  --card-shadow-hover: 0 12px 28px rgba(0,0,0,0.12), 0 8px 10px rgba(0,0,0,0.08); /* Enhanced shadow for hover */
+  --card-radius: 12px; /* Consistent border radius for cards */
+}
+
+/* ==========================================================================
+   2. GLOBAL RESET & BASE STYLES
+   ========================================================================== */
+html, body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  overflow-x: hidden; /* Prevent horizontal scroll globally */
+}
+
+body {
+  background: #fff; /* Default background for pages like about, services */
+  color: var(--text-main);
+  font-family: var(--font-main);
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none; /* Remove default underlines from links */
+  color: inherit; /* Inherit text color by default for links */
+}
+
+/* ==========================================================================
+   3. GENERAL LAYOUT & COMPONENTS
+   ========================================================================== */
+
+/* --- Header (Default for light backgrounds) --- */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.95);
+  color: var(--text-main);
+  padding: 0.75em 2.5em;
+  width: 100%;
+  position: relative; /* Changed from fixed for simplicity if not strictly needed, or keep fixed if sticky behavior is desired */
+  z-index: 1000;
+  box-sizing: border-box;
+  height: 70px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* --- Logo (Shared by all headers, variations handled by context) --- */
+.logo-container img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+.logo-container img.logo-for-dark-theme {
+  display: none; /* Hidden by default */
+}
+.logo-container img.logo-default {
+  display: block; /* Shown by default */
+}
+
+/* --- Navigation (Default for light backgrounds) --- */
+nav {
+  display: flex;
+  align-items: center;
+}
+
+nav a {
+  color: var(--text-secondary);
+  margin-left: 2.2em;
+  font-family: var(--font-main);
+  font-size: 1.05em;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+nav a:hover {
+  color: var(--violet);
+  text-decoration: underline;
+}
+
+/* Say Hi Button in Nav (Default) */
+nav .say-hi {
+  margin-left: 2.2em;
+  padding: 0.5em 1.5em;
+  background: var(--violet);
+  border-radius: 6px;
+  color: var(--text-light) !important; /* Important to override general nav a color */
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-size: 1.05em;
+  transition: background-color 0.2s, transform 0.2s;
+}
+nav .say-hi:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+  color: var(--text-light) !important; /* Ensure hover color remains light */
+  text-decoration: none;
+}
+
+/* --- Main Content Area --- */
+main {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+  flex-grow: 1; /* Allows main to fill space if body is flex container */
+}
+
+/* --- Footer (Default - hidden, shown on specific pages) --- */
+footer {
+  text-align: center;
+  font-size: 1em;
+  padding: 1.5em 0;
+  color: var(--text-light);
+  width: 100%;
+  background: transparent;
+  letter-spacing: 0.03em;
+  font-family: var(--font-main);
+  box-sizing: border-box;
+  display: none; /* Hidden by default, enabled by page-specific classes */
+}
+
+/* --- Card Base Styles (Shared by Service/Work cards on Services Page) --- */
+a.service-card,
+a.work-card {
+  background: var(--text-light);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: 2em 2.5em;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  box-sizing: border-box;
+  color: var(--text-main); /* Default text color for cards */
+}
+a.service-card:hover,
+a.work-card:hover {
+  transform: scale(1.03) translateY(-7px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+
+/* ==========================================================================
+   4. HOMEPAGE SPECIFIC STYLES (`body.home`)
+   ========================================================================== */
+body.home {
+  background: linear-gradient(120deg,#232946 0%,#4f2e91 35%,#b15cff 70%,#ff6ac1 100%);
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative; /* For z-indexing of canvas and content */
+}
+
+/* --- Homepage Main Centered Content --- */
+body.home .main-center {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative; /* For z-indexing of typewriter above canvas */
+  z-index: 1;
+}
+body.home .main-center .content-wrapper { /* Wrapper for typewriter and danger-zone link */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* --- Homepage Typewriter Effect --- */
+body.home .typewriter {
+  color: #fff;
+  font-family: var(--font-title);
+  font-size: 3em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: 0 2px 18px rgba(40,0,100,0.14);
+  border-right: 2px solid #fff; /* Caret */
+  white-space: nowrap;
+  overflow: hidden;
+  width: auto; /* Will be animated */
+  animation: typing 2s steps(8, end), blink-caret .75s step-end infinite;
+}
+@keyframes typing {
+  from { width: 0 }
+  to { width: 9.5ch } /* Adjust based on "Welcome!" length */
+}
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: white; }
+}
+
+/* --- Homepage Dot Animation Canvas --- */
+#dot-animation-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind main content */
+  pointer-events: none; /* Allows clicks to pass through */
+}
+
+/* --- Header (Homepage Variant) --- */
+body.home header,
+header.home-header { /* Added class for potential direct use */
+  background: transparent;
+  color: var(--text-light);
+  box-shadow: none;
+  /* position: relative; Already set in default header, still applies */
+  /* z-index: 1000; Already set */
+}
+body.home header nav a,
+header.home-header nav a {
+  color: var(--text-light); /* Overrides default nav a color */
+}
+body.home header nav a:hover,
+header.home-header nav a:hover {
+  color: var(--violet); /* CHANGED from --highlight, consistency with other hovers */
+  text-decoration: underline;
+}
+/* Note: .say-hi button styles on homepage are inherited and don't need specific overrides here unless background/color changes */
+
+/* --- Footer (Homepage Variant) --- */
+body.home footer,
+footer.home-footer { /* Added class for potential direct use */
+  display: block; /* Makes footer visible on homepage */
+  background: transparent; /* Ensure it's transparent */
+  position: relative; /* To ensure it's above canvas if fixed */
+  z-index: 1;
+}
+
+/* --- Danger Zone Link (on Homepage) --- */
+.danger-zone-link-container {
+  margin-top: 2.5em;
+  z-index: 1; /* Ensure it's above canvas */
+  position: relative;
+  opacity: 0; /* Initially hidden for animation */
+  visibility: hidden; /* Initially hidden for animation */
+  transform: translateY(20px); /* Initially offset down for animation */
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out, visibility 0s linear 0.6s;
+}
+.danger-zone-link-container.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s; /* Reset delay when shown */
+}
+.danger-zone-link {
+  font-family: var(--font-main);
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #fff;
+  padding: 0.7em 1.8em;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+  display: inline-block;
+}
+.danger-zone-link:hover {
+  background-color: #fff;
+  color: #333; /* Dark text on white background */
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   5. ABOUT PAGE STYLES (`body.about`)
+   ========================================================================== */
+body.about {
+  background: var(--text-light); /* White background */
+  color: var(--text-main);      /* Dark text */
+}
+body.about main {
+  padding: 0; /* Remove default padding if main had any */
+}
+
+/* --- About Page: Bio Section --- */
+body.about .bio-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch; /* Makes cards and description same virtual height if needed */
+  gap: 3.5em;
+  width: 100%;
+  padding: 4em 2em;
+  background-color: var(--text-light); /* Explicitly white */
+  min-height: 100vh; /* Full viewport height */
+  box-sizing: border-box;
+}
+.bio-card { /* Left side: Photo, Name, Role, Socials */
+  min-width: 280px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Vertically center content within card */
+  text-align: center;
+}
+.bio-photo {
+  width: 160px;
+  height: 160px;
+  border-radius: var(--card-radius);
+  object-fit: cover;
+  margin-bottom: 0.3em; /* Small space before name */
+  box-shadow: var(--card-shadow);
+  background: #e3e3e3; /* Placeholder bg if image fails */
+}
+.bio-name {
+  font-family: var(--font-title);
+  font-size: 1.8em;
+  font-weight: 700;
+  margin-bottom: 0.1em;
+}
+.bio-role {
+  color: var(--text-secondary);
+  font-size: 1.1em;
+  margin-bottom: 1em; /* Space before socials */
+}
+.bio-socials {
+  display: flex;
+  gap: 1em;
+  margin-bottom: 0; /* No extra space at bottom of card */
+  justify-content: center;
+}
+.bio-socials a img {
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.bio-socials a img:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+.bio-description { /* Right side: "About Me", Paragraph, CV Button */
+  flex: 1 1 320px; /* Grow and shrink, base width 320px */
+  min-width: 300px;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center content */
+  align-items: flex-start; /* Align text and button to the left */
+}
+.bio-description h1 {
+  font-family: var(--font-title);
+  font-size: 2.0em;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+  text-align: left;
+  width: 100%;
+}
+.bio-description p {
+  font-size: 1.1em;
+  line-height: 1.7;
+  margin-bottom: 2em; /* Space before CV button */
+  color: var(--text-secondary);
+  text-align: left;
+  width: 100%;
+}
+.bio-cv-btn {
+  background: var(--violet);
+  color: var(--text-light) !important; /* Ensure light text */
+  padding: 0.8em 2.5em;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: 600;
+  border: none;
+  transition: background-color 0.2s, transform 0.15s;
+  display: inline-block; /* For padding and margin */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  align-self: center; /* Center button if bio-description is centered */
+}
+.bio-cv-btn:hover {
+  background: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* --- About Page: Research Section --- */
+body.about .research-section {
+  background: var(--bg-dark);
+  color: #eaeaea; /* Light gray text on dark background */
+  padding: 4em 2em;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.research-section h1 {
+  font-family: var(--font-title);
+  font-size: 2.0em;
+  font-weight: 700;
+  color: var(--text-light); /* White title */
+  margin-bottom: 1.5em;
+  text-align: center;
+}
+.research-content {
+  max-width: 750px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center; /* Center content block and button */
+}
+.research-content p {
+  font-size: 1.1em;
+  margin-bottom: 1.5em;
+  line-height: 1.7;
+  text-align: left; /* Paragraphs themselves are left-aligned */
+}
+/* .research-content .highlight rule removed */
+/* .research-content .highlight-alt rule removed */
+.research-email-btn {
+  display: inline-block;
+  background: var(--violet); /* CHANGED from transparent */
+  color: var(--text-light) !important; /* CHANGED from var(--highlight) */
+  padding: 0.8em 2.2em;
+  border-radius: 8px;
+  font-size: 1.05em;
+  font-family: inherit; /* Use main font */
+  font-weight: 600;
+  margin-top: 1.5em; /* Space above button */
+  transition: background-color 0.2s, color 0.2s, transform 0.15s; /* UPDATED transition */
+  border: none; /* ADDED, was 2px solid var(--highlight) */
+  text-decoration: none; /* Ensures consistency for <a> tags used as buttons */
+}
+.research-email-btn:hover {
+  background: var(--accent); /* CHANGED from var(--highlight) */
+  color: var(--text-light) !important; /* CHANGED from var(--bg-dark) */
+  transform: translateY(-2px); /* ADDED */
+}
+
+/* --- About Page: Publications Section --- */
+body.about .pubs-section {
+  background: var(--text-light); /* White background */
+  padding: 4em 2em;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.pubs-section h1 {
+  font-family: var(--font-title);
+  font-size: 2.0em;
+  font-weight: 700;
+  color: var(--text-main); /* Dark title */
+  margin-bottom: 1.5em;
+  text-align: center;
+}
+.pubs-section ul {
+  list-style: none; /* Remove default bullets */
+  padding-left: 0; /* Remove default padding */
+  text-align: left; /* Align list items to the left */
+  max-width: 750px;
+  width: 100%;
+}
+.pubs-section li {
+  margin-bottom: 1.3em;
+  font-size: 1.1em;
+  padding-left: 1.5em; /* Space for custom bullet */
+  position: relative; /* For custom bullet positioning */
+}
+.pubs-section li::before {
+  content: '•';
+  color: var(--violet);
+  font-weight: bold;
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  font-size: 1.2em; /* Slightly larger bullet */
+}
+.pub-link {
+  color: var(--violet);
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.pub-link:hover {
+  text-decoration: underline;
+  color: var(--accent);
+}
+.pub-year {
+  color: var(--text-secondary);
+  font-size: 0.95em;
+  margin-left: 0.5em;
+}
+
+/* ==========================================================================
+   6. SERVICES PAGE STYLES (`body.services`)
+   ========================================================================== */
+body.services {
+  background: var(--text-light); /* White background */
+  color: var(--text-main);      /* Dark text */
+}
+
+/* --- Services Page: Full Screen Layout Utility --- */
+/* Applied to sections like .services-intro-section and .my-work-section */
+.full-screen-layout {
+  height: 100vh; /* Full viewport height */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Default centering */
+  align-items: center;
+  padding: 3em 2em; /* Padding around the content */
+  box-sizing: border-box;
+  overflow: hidden; /* Prevents scrollbars on the section itself */
+}
+
+/* Target the first screen of the services page specifically */
+.services-page-first-screen.full-screen-layout {
+  justify-content: flex-start; /* Align content to the top of this section */
+  padding-top: 5em;           /* Position the start of the content 5em from the section's top */
+}
+
+/* Increase space above the consultation button specifically on the first screen */
+.services-page-first-screen .content-container .consultation-button-section {
+  margin-top: 1.5em;
+}
+
+.full-screen-layout .content-container {
+  width: 100%;
+  max-width: 1100px; /* Max width for content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2.5em; /* Space between title, cards, button etc. */
+  overflow-y: auto; /* Allows content within to scroll if it exceeds viewport */
+  max-height: calc(100vh - 6em); /* Max height considering padding of parent */
+  padding: 1em 0; /* Padding for scrollable content */
+}
+
+/* --- Services Page: Intro Section --- */
+body.services .services-intro-section { /* Now a div, styles target this specific div */
+  background-color: var(--text-light); /* Explicitly white, though inherited */
+}
+.services-intro-section h1 { /* Style for the H1 within the .services-intro-section div */
+  font-family: var(--font-title);
+  font-size: 2.8em;
+  font-weight: 700;
+  margin-bottom: 0; /* Gap managed by .content-container */
+  color: var(--text-main);
+}
+
+/* --- Services Page: Service Cards --- */
+.services-cards-section { /* Container for service cards, now a div */
+  display: flex;
+  justify-content: center;
+  gap: 5em;
+  margin-bottom: 0; /* Gap managed by .content-container */
+  flex-wrap: wrap; /* Allow cards to wrap on smaller screens */
+  width: 100%;
+}
+a.service-card { /* Individual service card styling (inherits from general card) */
+  align-items: flex-start; /* Align content to the left */
+  text-align: left;
+  flex-basis: 400px; /* Base width before growing/shrinking */
+  max-width: 450px;
+}
+.service-card img { /* Icon in service card */
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1.2em;
+}
+.service-card h3 {
+  font-family: var(--font-title);
+  font-size: 1.6em;
+  font-weight: 700;
+  margin-bottom: 0.6em;
+  color: var(--text-main);
+}
+.service-card p {
+  font-size: 1em;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+/* --- Services Page: Consultation Button --- */
+.consultation-button-section { /* Now a div */
+  margin-bottom: 0; /* Gap managed by .content-container */
+  width: 100%; /* Ensures button container takes full width for centering */
+}
+.consultation-btn {
+  display: inline-block;
+  padding: 0.9em 2.8em;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--violet) !important; /* Important to override link color */
+  background-color: var(--text-light); /* White background */
+  border: 2px solid var(--violet);
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+.consultation-btn:hover {
+  background-color: var(--violet);
+  color: var(--text-light) !important; /* White text on purple background */
+  transform: translateY(-2px);
+}
+
+/* --- Services Page: My Work Section --- */
+body.services .my-work-section { /* Remains a section */
+  background-color: var(--text-light); /* Explicitly white */
+}
+.my-work-section h2 {
+  font-family: var(--font-title);
+  font-size: 2.4em;
+  font-weight: 700;
+  margin-bottom: 0; /* Gap managed by .content-container */
+  color: var(--text-main);
+}
+
+/* --- Services Page: Work Cards --- */
+.work-cards-container { /* Container for work cards */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5em;
+  width: 100%;
+}
+a.work-card { /* Individual work card styling (inherits from general card) */
+  align-items: center; /* Center content */
+  text-align: center;
+  flex-basis: calc(50% - 1em); /* Two cards per row, accounting for gap */
+  max-width: 450px;
+}
+.work-card img { /* Image in work card */
+  max-width: 120px; /* Control image size */
+  height: auto;
+  margin-bottom: 1.2em;
+  object-fit: contain; /* Ensure image is not cropped */
+  border-radius: 8px; /* Rounded corners for images */
+}
+.work-card p { /* Title/description in work card */
+  font-size: 1.15em;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.4;
+  margin-top: 0.5em; /* Small space above text if needed */
+}
+
+/* --- Services Page: Scrollbar Fix for "My Work" Section --- */
+/* This section might have more content than fits 100vh, so allow natural scroll */
+.my-work-section.full-screen-layout {
+  height: auto; /* Override fixed height */
+  min-height: 100vh; /* Still aim for full screen but allow growth */
+  overflow: visible; /* Allow content to overflow naturally */
+}
+.my-work-section .content-container {
+  overflow-y: visible; /* Disable internal scroll */
+  max-height: none; /* Allow it to take full content height */
+}
+
+/* ==========================================================================
+   7. DANGER ZONE PAGE STYLES (`body.page-danger-zone`)
+   ========================================================================== */
+body.page-danger-zone {
+  background-color: #282c34; /* Dark background */
+  color: #f0f0f0; /* Light text */
+  font-family: var(--font-main);
+}
+
+/* --- Header (Danger Zone Variant) --- */
+body.page-danger-zone header {
+  background-color: #1e2228; /* Even darker header background */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Darker shadow */
+  border-bottom: 1px solid #333; /* Subtle border */
+}
+/* Logo switch for dark theme */
+body.page-danger-zone header .logo-container img.logo-default {
+  display: none; /* Hide default logo */
+}
+body.page-danger-zone header .logo-container img.logo-for-dark-theme {
+  display: block; /* Show dark theme logo */
+}
+/* Nav links on dark theme */
+body.page-danger-zone header nav a {
+  color: #d0d0d0; /* Lighter gray for nav links */
+}
+body.page-danger-zone header nav a:hover {
+  color: var(--violet); /* Accent color on hover */
+  text-decoration: underline;
+}
+/* Say Hi button on dark theme (maintains its look) */
+body.page-danger-zone header nav a.say-hi {
+  background: var(--violet);
+  color: var(--text-light) !important;
+}
+body.page-danger-zone header nav a.say-hi:hover {
+  background: var(--accent);
+}
+
+/* --- Danger Zone Page: Content Area --- */
+.danger-zone-content {
+  max-width: 850px;
+  margin: 2em auto; /* Top/bottom margin, centered horizontally */
+  padding: 2em;     /* Desktop padding */
+  text-align: center;
+  box-sizing: border-box; /* ADDED: Crucial for correct width calculation with padding */
+  width: 100%;            /* ADDED: Makes it take full available width up to max-width */
+}
+.danger-zone-content .page-title {
+  font-family: var(--font-title);
+  font-size: 2.8em;
+  font-weight: 700;
+  margin-bottom: 0.2em;
+  color: #fff; /* White title */
+}
+.danger-zone-content .subtitle {
+  font-size: 1.15em;
+  color: #b0b0b0; /* Lighter gray subtitle */
+  margin-bottom: 3.5em; /* Space before items */
+  line-height: 1.6;
+}
+
+/* --- Danger Zone Page: Danger Items (e.g., algorithm entries) --- */
+.danger-item { /* Was .algorithm-entry */
+  margin-bottom: 4em; /* Space between items */
+}
+.danger-item h4 { /* Title for each item - CHANGED from h3 to h4 to match HTML */
+  font-family: var(--font-title);
+  font-size: 1.5em;
+  font-weight: 600;
+  margin-bottom: 0.8em;
+  color: #e0e0e0; /* Slightly off-white for item titles */
+  text-align: center;
+}
+
+/* --- Danger Zone Page: Image Wrappers & Overlays --- */
+.image-wrapper {
+  position: relative; /* For positioning overlays */
+  display: block; /* Or inline-block if preferred */
+  width: 100%;
+  max-width: 550px; /* Adjust for desired image size */
+  margin: 0 auto; /* Center the image wrapper */
+  border-radius: 6px;
+  overflow: hidden; /* Keep overlays within bounds */
+}
+.image-wrapper img {
+  display: block; /* Remove bottom space */
+  width: 100%;
+  height: auto;
+  border-radius: 6px; /* Match wrapper's radius */
+}
+.label-overlay {
+  position: absolute;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 3px;
+  color: white;
+  line-height: 1; /* For tight fit */
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Readability */
+  box-sizing: border-box;
+  white-space: nowrap; /* Prevent text wrapping */
+}
+.label-green {
+  background-color: rgba(20, 180, 20, 0.85); /* Semi-transparent green */
+  border: 1px solid rgba(255,255,255,0.3); /* Subtle border */
+}
+.label-pink {
+  background-color: rgba(255, 105, 180, 0.85); /* Semi-transparent pink */
+  border: 1px solid rgba(255,255,255,0.3); /* Subtle border */
+}
+
+
+/* ==========================================================================
+   8. RESPONSIVE ADJUSTMENTS
+   ========================================================================== */
+
+/* --- Medium Devices (Tablets, smaller desktops) --- */
+@media (max-width: 992px) {
+  /* Services Page Cards */
+  .services-cards-section,
+  .work-cards-container {
+    gap: 2em; /* Reduce gap between cards */
+  }
+  a.service-card,
+  a.work-card {
+    flex-basis: calc(50% - 1em); /* Two cards per row, adjust for new gap */
+  }
+}
+
+/* --- Small Devices (Landscape Phones, Large Portrait Phones, Small Tablets) --- */
+@media (max-width: 768px) {
+  /* Header */
+  header {
+    padding: 0.75em 1.5em; /* Reduce padding */
+  }
+  nav a {
+    margin-left: 1.5em; /* Reduce nav item spacing */
+  }
+  nav .say-hi {
+    margin-left: 1.5em;
+    padding: 0.4em 1em; /* Smaller button */
+  }
+
+  /* About Page Sections */
+  body.about .bio-section,
+  body.about .research-section,
+  body.about .pubs-section {
+    min-height: 0; /* Allow sections to shrink */
+    padding: 3em 1.5em; /* Reduce padding */
+  }
+  body.about .bio-section {
+    flex-direction: column; /* Stack bio card and description */
+    align-items: center; /* Center items when stacked */
+    gap: 2.5em;
+  }
+  .bio-card, .bio-description {
+    width: 100%;
+    max-width: 500px; /* Limit width when stacked */
+    min-width: unset;
+  }
+  .bio-description { text-align: center; } /* Center align description block */
+  .bio-description h1, .bio-description p { text-align: left; } /* Keep text itself left-aligned */
+  .bio-description p { font-size: 1em; } /* Slightly smaller paragraph text */
+
+  .research-content, .pubs-section ul {
+    padding: 0 1em; /* Add some horizontal padding to content blocks */
+  }
+
+  /* Services Page Layout */
+  .full-screen-layout {
+    height: auto; /* Allow sections to grow with content */
+    min-height: 100vh; /* Still aim for full screen if content is short */
+    padding: 3em 1.5em; /* Reduce padding */
+  }
+  .full-screen-layout .content-container {
+    gap: 2em; /* Reduce gap */
+    max-height: none; /* Allow content to determine height */
+    overflow-y: visible; /* No internal scroll */
+  }
+  /* Adjustments for services-page-first-screen on smaller devices */
+  .services-page-first-screen.full-screen-layout {
+    padding-top: 3em; /* Less top padding on smaller screens */
+  }
+  .services-page-first-screen .content-container .consultation-button-section {
+    margin-top: 1em; /* Less extra margin on smaller screens */
+  }
+
+  .services-cards-section,
+  .work-cards-container {
+    flex-direction: column; /* Stack cards vertically */
+    align-items: center; /* Center cards */
+    gap: 2em;
+  }
+  a.service-card,
+  a.work-card {
+    flex-basis: auto; /* Full width when stacked */
+    width: 90%; /* Take most of the width */
+    max-width: 450px; /* But not too wide */
+  }
+  .services-intro-section h1 { font-size: 2.2em; }
+  .my-work-section h2 { font-size: 2em; }
+  .service-card h3 { font-size: 1.4em; }
+  .work-card p { font-size: 1.05em; }
+
+  /* Danger Zone Page */
+  .danger-zone-content .page-title {
+    font-size: 2.4em;
+  }
+  .danger-zone-content .subtitle {
+    font-size: 1.1em;
+    margin-bottom: 2.5em;
+  }
+  .danger-item h4 { /* CHANGED from h3 to h4 */
+    font-size: 1.35em;
+  }
+  .image-wrapper {
+    max-width: 90%; /* Allow image to be slightly smaller than full width */
+  }
+}
+
+/* --- Extra Small Devices (Portrait Phones) --- */
+@media (max-width: 500px) {
+  /* Homepage */
+  body.home .typewriter {
+    font-size: 2.2em; /* Smaller typewriter text */
+  }
+
+  /* Header */
+  header {
+    padding: 0.5em 1em; /* Further reduce padding */
+    flex-direction: column; /* Stack logo and nav */
+    height: auto; /* Allow header to grow */
+    gap: 0.5em; /* Space between logo and nav */
+  }
+  /* HIDE LOGO ON MOBILE */
+  .logo-container {
+    display: none;
+  }
+
+  nav {
+    flex-wrap: wrap; /* Allow nav items to wrap */
+    justify-content: center; /* Center nav items */
+    gap: 0.5em 1em; /* Spacing for wrapped items */
+  }
+  nav a, nav .say-hi {
+    margin-left: 0.5em; /* Minimal margin */
+    font-size: 0.95em; /* Smaller nav text */
+  }
+
+  /* About Page: Bio Section */
+  .bio-photo {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 0.6em;
+  }
+  .bio-role {
+    margin-bottom: 0.6em;
+  }
+  .bio-description h1 { font-size: 1.8em; }
+  /* About Page: Section Titles */
+  .research-section h1, .pubs-section h1 { font-size: 1.8em; }
+
+  /* Services Page Layout */
+  .full-screen-layout {
+    padding: 2em 1em; /* Further reduce padding */
+  }
+  .full-screen-layout .content-container {
+    gap: 1.5em; /* Further reduce gap */
+  }
+  /* Adjustments for services-page-first-screen on very small devices */
+  .services-page-first-screen.full-screen-layout {
+    padding-top: 2em; /* Even less top padding */
+  }
+  .services-page-first-screen .content-container .consultation-button-section {
+    margin-top: 0.5em; /* Even less extra margin */
+  }
+
+  a.service-card,
+  a.work-card {
+    padding: 1.5em; /* Reduce card padding */
+  }
+  .consultation-btn {
+    padding: 0.8em 2em; /* Smaller button */
+    font-size: 1em;
+  }
+
+  /* Danger Zone Page */
+  .danger-zone-content {
+    padding: 1.5em 1em; /* This existing rule correctly adjusts padding for mobile */
+  }
+  .danger-zone-content .page-title {
+    font-size: 2em;
+  }
+  .danger-zone-content .subtitle {
+    font-size: 1em;
+  }
+  .danger-item h4 { /* CHANGED from h3 to h4 */
+    font-size: 1.2em;
+  }
+  .image-wrapper {
+    max-width: 100%; /* Image can take full width if needed */
+  }
+  .label-overlay {
+    font-size: 0.75rem; /* Smaller labels */
+    padding: 4px 8px;
+  }
+}

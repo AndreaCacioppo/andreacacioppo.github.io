@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Legal Document Analysis using a LLM - Andrea Cacioppo</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body.page-case-study {
+      background-color: var(--text-light);
+      color: var(--text-main);
+    }
+
+    .case-study-main-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3em 2em;
+      box-sizing: border-box; /* ADDED for correct width calculation with padding */
+      width: 100%;            /* ADDED to ensure it respects max-width and centers properly */
+    }
+
+    .case-study-main-content .page-header h1 {
+      font-family: var(--font-title);
+      font-size: 2.6em;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 1.5em;
+      text-align: left;
+    }
+
+    .case-study-sections-container {
+      margin-bottom: 3em;
+    }
+
+    .case-study-section {
+      display: flex;
+      align-items: flex-start;
+      gap: 2em;
+      margin-bottom: 3em;
+    }
+
+    .case-study-section .section-icon {
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      /* Adjusted margin-top to align icon with paragraph text */
+      margin-top: 3.5em; /* (1.5em H2 font * 1.3 LH) + 0.5em H2 margin-bottom */
+    }
+
+    .case-study-section .section-content h2 {
+      font-family: var(--font-title);
+      font-size: 1.5em;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 0;
+      margin-bottom: 0.5em;
+      line-height: 1.3; /* Added for consistent height calculation */
+    }
+
+    .case-study-section .section-content p {
+      font-family: var(--font-main);
+      font-size: 1em;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+    }
+
+    .consultation-button-container {
+      text-align: center;
+      margin-top: 3em;
+      margin-bottom: 2em;
+    }
+
+    @media (max-width: 768px) {
+      .case-study-main-content {
+        padding: 2.5em 1.5em;
+      }
+      .case-study-main-content .page-header h1 {
+        font-size: 2.2em;
+        text-align: center;
+      }
+      .case-study-section {
+        gap: 1.5em;
+        margin-bottom: 2.5em;
+      }
+      .case-study-section .section-icon {
+        width: 50px;
+        height: 50px;
+        /* Adjusted margin-top for smaller H2 font size */
+        margin-top: 2.255em; /* (1.35em H2 font * 1.3 LH) + 0.5em H2 margin-bottom */
+      }
+      .case-study-section .section-content h2 {
+        font-size: 1.35em;
+        /* line-height: 1.3; will be inherited */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .case-study-main-content .page-header h1 {
+        font-size: 1.9em;
+      }
+      .case-study-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .case-study-section .section-icon {
+        margin-bottom: 1em;
+        margin-top: 0; /* Reset margin-top for stacked layout */
+      }
+    }
+  </style>
+</head>
+<body class="page-case-study">
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <a href="index.html"> <!-- Added this anchor tag -->
+        <img src="images/logo_black.png" alt="Logo" />
+      </a> <!-- Closed the anchor tag -->
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Services</a>
+      <a href="mailto:andrea.cacioppo@uniroma1.it" class="say-hi">Say Hi</a>
+    </nav>
+  </header>
+  <main class="case-study-main-content">
+    <div class="page-header">
+      <h1>Legal document analysis using a LLM</h1>
+    </div>
+<div class="case-study-sections-container">
+  <!-- Overview Section -->
+  <section class="case-study-section">
+    <img src="images/overview.png" alt="Overview Icon" class="section-icon">
+    <div class="section-content">
+      <h2>Overview</h2>
+      <p>
+        Analyzing a large volume of legal documents is a critical task for law firms and corporate legal teams, often requiring significant time and effort. Leveraging Large Language Models (LLMs) through APIs can expedite this process by extracting key information and identifying anomalies in the data.
+      </p>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="case-study-section">
+    <img src="images/problem.png" alt="Problem Icon" class="section-icon">
+    <div class="section-content">
+      <h2>Problem</h2>
+      <p>
+        A client in the legal industry needed a solution to process and analyze thousands of complex legal contracts efficiently. They sought a system that could extract relevant clauses, identify compliance risks, and detect potential anomalies across the dataset.
+      </p>
+    </div>
+  </section>
+
+  <!-- Solution Section -->
+  <section class="case-study-section">
+    <img src="images/solution.png" alt="Solution Icon" class="section-icon">
+    <div class="section-content">
+      <h2>Solution</h2>
+      <p>
+        To address this challenge, I developed a system using a Large Language Model API. This system utilized advanced natural language processing techniques to extract important legal clauses, flag inconsistencies, and perform anomaly detection. The framework was customized to meet the client's specific operational and regulatory needs, significantly reducing manual review times.
+      </p>
+    </div>
+  </section>
+</div>
+
+<div class="consultation-button-container">
+  <a href="book-free-consultation.html" class="consultation-btn">Book free consultation</a>
+</div>
+  </main>
+</body>
+</html>

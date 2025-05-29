@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Free Consultation - Andrea Cacioppo</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body.page-book-consultation {
+      background-color: var(--text-light); /* White background */
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh; /* Ensure page takes at least full viewport height */
+    }
+
+    /* Main content area for the booking page */
+    .book-consultation-main-content {
+      flex-grow: 1; /* Allows main content to expand and fill available space */
+      max-width: 800px; /* Max width for the content area */
+      margin: 0 auto;   /* Center the content block horizontally */
+      padding: 3em 2em; /* Vertical and horizontal padding */
+      text-align: center; /* Center text and inline-block elements like the widget container */
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center flex items (like the widget itself) */
+      box-sizing: border-box; /* ADDED for correct width calculation with padding */
+      width: 100%;            /* ADDED to ensure it respects max-width and centers properly */
+    }
+
+    .book-consultation-main-content .page-title h1 {
+      font-family: var(--font-title);
+      font-size: 2.5em; /* Title size */
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5em; /* Space below the title */
+    }
+
+    .book-consultation-main-content .intro-paragraph {
+      font-family: var(--font-main);
+      font-size: 1.1em;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 2.5em; /* Space after intro before Calendly widget */
+      max-width: 700px; /* Limit width of intro paragraph for readability */
+    }
+
+    /* Styling for the Calendly widget container */
+    .calendly-widget-container {
+      width: 100%; /* Make container take full width of its parent */
+      max-width: 700px; /* But not wider than this, for larger screens */
+      border-radius: var(--card-radius); /* Consistent border radius */
+      box-shadow: var(--card-shadow); /* Consistent shadow */
+      overflow: hidden; /* Important for border-radius to clip the iframe */
+      margin-top: 1em; /* Space above the widget */
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .book-consultation-main-content {
+        padding: 2.5em 1.5em;
+      }
+      .book-consultation-main-content .page-title h1 {
+        font-size: 2.2em;
+      }
+      .book-consultation-main-content .intro-paragraph {
+        font-size: 1.05em;
+        margin-bottom: 2em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .book-consultation-main-content .page-title h1 {
+        font-size: 1.9em;
+      }
+      .book-consultation-main-content .intro-paragraph {
+        font-size: 1em;
+      }
+      /* Ensure Calendly widget (via its inline style `min-width:320px`) behaves well.
+         The container will manage its width. */
+      .calendly-widget-container {
+        max-width: 100%; /* Allow it to shrink fully on small screens */
+      }
+    }
+  </style>
+</head>
+<body class="page-book-consultation">
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <a href="index.html"> <!-- Added this anchor tag -->
+        <img src="images/logo_black.png" alt="Logo" />
+      </a> <!-- Closed the anchor tag -->
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Services</a>
+      <a href="mailto:andrea.cacioppo@uniroma1.it" class="say-hi">Say Hi</a>
+    </nav>
+  </header>
+
+  <main class="book-consultation-main-content">
+    <div class="page-title">
+      <h1>Book a Free Consultation</h1>
+    </div>
+    <p class="intro-paragraph">
+      Pick a time slot!
+    </p>
+
+    <div class="calendly-widget-container">
+      <!-- Calendly inline widget begin -->
+      <div class="calendly-inline-widget" data-url="https://calendly.com/andrea-cacioppo-1994/30min" style="min-width:320px;height:700px;"></div>
+      <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+      <!-- Calendly inline widget end -->
+    </div>
+
+  </main>
+  
+  <!-- No footer for this page, consistent with other sub-pages -->
+</body>
+</html>
