@@ -475,27 +475,53 @@ body.about .research-section {
   line-height: 1.7;
   text-align: left; /* Paragraphs themselves are left-aligned */
 }
-/* .research-content .highlight rule removed */
-/* .research-content .highlight-alt rule removed */
+
+/* --- Styles for .consultation-btn specifically within .research-section --- */
+/* This targets the .consultation-btn when it's inside .research-section */
+.research-section .consultation-btn {
+  display: inline-block; /* Ensure display properties for padding etc. */
+  padding: 0.9em 2.8em; /* Match original .consultation-btn padding */
+  font-size: 1.1em; /* Match original font-size */
+  font-weight: 600; /* Match original font-weight */
+  border-radius: 8px; /* Match original border-radius */
+  transition: background-color 0.2s, color 0.2s, transform 0.2s, border-color 0.2s; /* Added border-color to transition */
+
+  background-color: transparent;       /* Make background transparent to match page */
+  color: var(--text-light) !important; /* Text color light for dark background */
+  border: 2px solid var(--text-light); /* Border light, ensure width and style are set */
+  margin-top: 1.5em;                   /* Add some space above the button */
+  text-decoration: none;               /* Ensure no underline from <a> tag */
+}
+
+.research-section .consultation-btn:hover {
+  background-color: var(--violet);        /* Fill with violet on hover */
+  color: var(--text-light) !important;  /* Text remains light */
+  border-color: var(--violet);          /* Border also becomes violet (matches bg fill) */
+  transform: translateY(-2px); /* Inherited or can be re-stated */
+}
+
+/* Old .research-email-btn styles - commented out as .consultation-btn is now used */
+/*
 .research-email-btn {
   display: inline-block;
-  background: var(--violet); /* CHANGED from transparent */
-  color: var(--text-light) !important; /* CHANGED from var(--highlight) */
+  background: var(--violet);
+  color: var(--text-light) !important;
   padding: 0.8em 2.2em;
   border-radius: 8px;
   font-size: 1.05em;
-  font-family: inherit; /* Use main font */
+  font-family: inherit;
   font-weight: 600;
-  margin-top: 1.5em; /* Space above button */
-  transition: background-color 0.2s, color 0.2s, transform 0.15s; /* UPDATED transition */
-  border: none; /* ADDED, was 2px solid var(--highlight) */
-  text-decoration: none; /* Ensures consistency for <a> tags used as buttons */
+  margin-top: 1.5em;
+  transition: background-color 0.2s, color 0.2s, transform 0.15s;
+  border: none;
+  text-decoration: none;
 }
 .research-email-btn:hover {
-  background: var(--accent); /* CHANGED from var(--highlight) */
-  color: var(--text-light) !important; /* CHANGED from var(--bg-dark) */
-  transform: translateY(-2px); /* ADDED */
+  background: var(--accent);
+  color: var(--text-light) !important;
+  transform: translateY(-2px);
 }
+*/
 
 /* --- About Page: Publications Section --- */
 body.about .pubs-section {
@@ -651,6 +677,7 @@ a.service-card { /* Individual service card styling (inherits from general card)
   margin-bottom: 0; /* Gap managed by .content-container */
   width: 100%; /* Ensures button container takes full width for centering */
 }
+/* Base .consultation-btn style for light backgrounds */
 .consultation-btn {
   display: inline-block;
   padding: 0.9em 2.8em;
@@ -660,11 +687,13 @@ a.service-card { /* Individual service card styling (inherits from general card)
   background-color: var(--text-light); /* White background */
   border: 2px solid var(--violet);
   border-radius: 8px;
-  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s, border-color 0.2s; /* Added border-color to transition */
+  text-decoration: none; /* Ensure no underline for <a> tags */
 }
 .consultation-btn:hover {
   background-color: var(--violet);
   color: var(--text-light) !important; /* White text on purple background */
+  border-color: var(--violet); /* Ensure border matches background on hover */
   transform: translateY(-2px);
 }
 
@@ -1003,7 +1032,8 @@ body.page-danger-zone header nav a.say-hi:hover {
   a.work-card {
     padding: 1.5em; /* Reduce card padding */
   }
-  .consultation-btn {
+  .consultation-btn,
+  .research-section .consultation-btn { /* Ensure consistent padding on mobile for both contexts */
     padding: 0.8em 2em; /* Smaller button */
     font-size: 1em;
   }
