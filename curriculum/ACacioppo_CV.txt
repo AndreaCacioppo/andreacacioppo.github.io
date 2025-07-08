@@ -1,0 +1,93 @@
+Andrea Cacioppo
+Curriculum vitae - April 15, 2025
+
+# andrea.cacioppo@uniroma1.it
+ www.andreacacioppo.com
+ð andrea-cacioppo
+
+Education
+pres. Ph.D. in Physics, Sapienza University of Rome, Italy
+Nov 2022 Topics: quantum generative models and physics-informed optimization algorithms
+Group: Fisica AI&QC group
+Supervisors: Stefano Giagu, Fabio Sciarrino
+
+Nov 2021 Ph.D. in Computer Engineering, Technical University of Munich, Germany
+Nov 2020 Topics: classical-quantum compound channels and algorithms for the automatic generation
+(interrupted) of quantum graph states
+Group: Theoretical quantum system design group
+Supervisors: Janis Nötzel, Jonathan Finley
+
+May 2020 M.Sc. in Theoretical Physics, Sapienza University of Rome, Italy
+Oct 2016 Thesis: “Deep learning for the parameter estimation of tight-binding Hamiltonians”
+Supervisors: Stefano Giagu, Stefan Bauer
+Grade: 109/110
+
+Oct 2016 B.Sc. in Physics, Sapienza University of Rome, Italy
+Sep 2013 Thesis: “Hidden Markov model”
+Supervisor : Luciano Pietronero
+Grade: 110/110 with honors
+
+Work Experience
+pres. ML Consulting, Individual clients, Italy
+Jan 2022 Topics: training NNs to solve PDEs in finance - implementation of diffusion models training NNs on incomplete datasets - invoice reconciliation using an online LLM
+
+Mar. 2025 ML Consulting, Grid +, Rome, Italy
+Nov 2024 Topic: Automatic analysis of legal documents and anomaly detection
+Nov 2024 Tutoring, Individual clients, Italy
+Jan 2022 Topics: mathematics, physics and computer science for university students
+Nov 2023 ML Consulting, Hypercube SA, Lugano, Switzerland
+Sep 2023 Topic: application of ML techniques to the detection of time series anomalies
+Aug 2023 ML Consulting, Primis Group SRL, Milan, Italy
+Dec 2022 Tasks: determine best ML solutions tailored to LiDAR and satellite data, design of an
+anomaly detection algorithm for LiDAR data (contract of Rete Ferroviaria Italiana SPA)
+
+Nov 2021 Tutoring, Technical University of Munich, Germany
+Nov 2020 Task: assisting students of the "Quantum networking" class
+
+Oct 2020 Research Internship, Max Planck Institute for Intelligent Systems, Tübingen,
+Sep 2019 Germany
+Topics: Deep learning for estimating tight-binding Hamiltonians, quantum machine learning
+models and their connection with kernel methods
+
+Awards and grants
+Nov 2024 Research grant, Sapienza University of Rome, Italy
+Nov 2023 "Development of quantum machine learning algorithms" - 1000 €
+Oct 2016 Excellence program for honor students, Sapienza University of Rome, Italy
+
+Talks
+Oct 2024 Quantum Computing @ INFN, Padova, Italy, Talk
+"Quantum diffusion models for quantum data learning"
+
+Oct 2024 38° cycle PhD seminar, Rome, Italy, Talk
+"Quantum machine learning and physics-informed deep learning algorithms"
+
+Apr 2024 EuCAIFCon2024, Amsterdam, Netherlands, Flash Talk
+"Quantum diffusion models
+
+Nov 2023 QAIxIAQ2023 Workshop, Rome, Italy, Talk
+"Quantum diffusion models using parameterized quantum circuits for data denoising"
+
+July 2021 ISIT, 2021 IEEE International Symposium on Information Theory, Talk
+"Compound channel capacities under energy constraints and application"
+
+Languages
+Native Italian
+Fluent English
+Beginner German
+
+Software
+Advanced Python, PyTorch
+Good Tensorflow, GitHub, Linux, LATEX
+Basic C, HTML
+
+Publications
+[1] Andrea Cacioppo, Lorenzo Colantonio, Simone Bordoni, and Stefano Giagu. Quantum Diffusion Models. arXiv preprint arXiv:2311.15444, 2023.
+[2] Andrea Cacioppo, Janis Nötzel, and Matteo Rosati. Compound Channel Capacities
+under Energy Constraints and Application. In 2021 IEEE International Symposium
+on Information Theory (ISIT), pages 640–645. IEEE, 2021.
+[3] Andrea Cacioppo. Deep learning for the parameter estimation of tight-binding
+Hamiltonians. Master’s thesis, Sapienza Università di Roma, Italy, 2020.
+[4] Lorenzo Colantonio, Andrea Cacioppo, Federico Scarpati, and Stefano Giagu. Efficient graph coloring with neural networks: A physics-inspired approach for large
+graphs. arXiv preprint arXiv:2408.01503, 2024.
+
+
