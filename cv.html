@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 
   <!-- one-column layout -->
   <style>
@@ -68,7 +69,7 @@
       margin-bottom: 1rem;
     }
 
-    header {
+    .cv-header {
       text-align: center;
       margin-bottom: 2rem;
     }
@@ -128,8 +129,21 @@
   </script>
 </head>
 <body>
-<main>
   <header>
+    <div class="logo-container">
+      <a href="index.html">
+        <img src="images/logo_black.png" alt="Logo" />
+      </a>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="cv.html" style="text-decoration: underline; color: var(--violet);">CV</a>
+      <a href="services.html">Services</a>
+      <a href="mailto:andrea.cacioppo@uniroma1.it" class="say-hi">Say Hi</a>
+    </nav>
+  </header>
+  <main>
+  <header class="cv-header">
     <h1>Andrea Cacioppo</h1>
     <p>Curriculum vitae - July 8 2025</p>
     <p>Email: <a href="mailto:andrea.cacioppo@uniroma1.it">andrea.cacioppo@uniroma1.it</a><br>
