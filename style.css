@@ -1084,3 +1084,6 @@ body.cv {
     padding: 4px 8px;
   }
 }
+@media print {
+  .download-pdf { display: none !important; }
+}
