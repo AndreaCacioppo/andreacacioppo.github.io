@@ -86,6 +86,25 @@
     section article {
       margin-bottom: 1.5rem;
     }
+
+    .download-btn {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 4px;
+    }
+
+    .download-btn:hover {
+      background: #0050e6;
+    }
+
+    .contact-icon {
+      margin-right: 0.25em;
+      vertical-align: middle;
+    }
   </style>
 
   <!-- JSON-LD -->
@@ -131,11 +150,15 @@
 <body>
   <main>
   <header class="cv-header">
+    <a href="curriculum/ACacioppo_CV.pdf" class="download-btn" download>Download PDF</a>
     <h1>Andrea Cacioppo</h1>
     <p>Curriculum vitae - July 8 2025</p>
-    <p>Email: <a href="mailto:andrea.cacioppo@uniroma1.it">andrea.cacioppo@uniroma1.it</a><br>
-       Website: <a href="https://www.andreacacioppo.com">https://www.andreacacioppo.com</a><br>
-       Linkedin: <a href="https://www.linkedin.com/in/andrea-cacioppo/">https://www.linkedin.com/in/andrea-cacioppo/</a></p>
+    <p>
+       <span class="contact-icon">📧</span>
+       <a href="mailto:andrea.cacioppo@uniroma1.it">andrea.cacioppo@uniroma1.it</a><br>
+       <img src="images/linkedin_logo.png" alt="LinkedIn" class="contact-icon" />
+       <a href="https://www.linkedin.com/in/andrea-cacioppo/">LinkedIn</a>
+    </p>
   </header>
 
   <section id="profile">
