@@ -32,11 +32,31 @@
       color: var(--text);
       line-height: 1.6;
       padding: 2rem 1rem;
+      animation: background-breathe 10s ease-in-out infinite;
     }
 
     main {
       max-width: 1000px;
       margin: 0 auto;
+      animation: content-breathe 10s ease-in-out infinite;
+    }
+
+    @keyframes content-breathe {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.02);
+      }
+    }
+
+    @keyframes background-breathe {
+      0%, 100% {
+        background-color: var(--bg);
+      }
+      50% {
+        background-color: #f0f4ff;
+      }
     }
 
     h1, h2, h3 {
