@@ -118,6 +118,23 @@
       height: 150px;
       border-radius: 50%;
       margin-bottom: 0.5rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Print-specific styles for better PDF rendering */
+    @media print {
+      .cv-header {
+        text-align: center !important;
+      }
+      
+      .profile-pic {
+        display: block !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-bottom: 0.5rem !important;
+      }
     }
   </style>
 
@@ -324,7 +341,7 @@
     <h2>Software</h2>
     <ul>
       <li>Python, PyTorch - advanced</li>
-      <li>Tensorflow, GitHub, Linux, Latex - good</li>
+      <li>Tensorflow, GitHub, Linux, Latex, PennyLane - good</li>
       <li>C, HTML - basic</li>
     </ul>
   </section>
