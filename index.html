@@ -4,7 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Andrea Cacioppo - Curriculum Vitae</title>
-  <meta name="description" content="Curriculum vitae of Andrea Cacioppo. Physicist with 6+ years of experience in machine learning.">
+  <meta name="description" content="Curriculum vitae of Andrea Cacioppo. Physicist and ML consultant with 6+ years of machine learning experience across research and industry.">
+  <meta name="author" content="Andrea Cacioppo">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="keywords" content="Andrea Cacioppo, Curriculum Vitae, CV, Resume, Machine Learning, ML, Quantum Computing, Physics, Consultant, Researcher">
+  <link rel="canonical" href="https://andreacacioppo.com/">
+  <link rel="alternate" type="application/pdf" href="/curriculum/ACacioppo_CV.pdf" title="Andrea Cacioppo CV (PDF)">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Andrea Cacioppo - Curriculum Vitae">
+  <meta property="og:description" content="Curriculum vitae of Andrea Cacioppo. Physicist and ML consultant with 6+ years of machine learning experience across research and industry.">
+  <meta property="og:type" content="profile">
+  <meta property="og:url" content="https://andreacacioppo.com/">
+  <meta property="og:image" content="https://andreacacioppo.com/images/foto_profilo.jpeg">
+  <meta property="profile:first_name" content="Andrea">
+  <meta property="profile:last_name" content="Cacioppo">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Andrea Cacioppo - Curriculum Vitae">
+  <meta name="twitter:description" content="Physicist and ML consultant with 6+ years of experience.">
+  <meta name="twitter:image" content="https://andreacacioppo.com/images/foto_profilo.jpeg">
 
   <!-- Preload Google Font for a clean, modern look -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -148,41 +168,99 @@
     }
   </style>
 
-  <!-- JSON-LD -->
+  <!-- JSON-LD: Enriched schema for AI/ATS parsing -->
   <script type="application/ld+json">
   {
-    "@context": "http://schema.org",
-    "@type": "Person",
-    "name": "Andrea Cacioppo",
-    "email": "mailto:andrea.cacioppo@uniroma1.it",
-    "url": "https://www.andreacacioppo.com",
-    "sameAs": ["https://www.linkedin.com/in/andrea-cacioppo/"],
-    "jobTitle": "Physicist, Machine Learning Consultant, Quantum Computing Researcher",
-    "alumniOf": [
+    "@context": "https://schema.org",
+    "@graph": [
       {
-        "@type": "EducationalOrganization",
-        "name": "Sapienza University of Rome"
+        "@type": "Person",
+        "@id": "https://andreacacioppo.com/#person",
+        "name": "Andrea Cacioppo",
+        "givenName": "Andrea",
+        "familyName": "Cacioppo",
+        "jobTitle": "Physicist, Machine Learning Consultant, Quantum Computing Researcher",
+        "description": "Physicist and ML consultant with 6+ years of experience across research and industry.",
+        "url": "https://andreacacioppo.com/",
+        "image": "https://andreacacioppo.com/images/foto_profilo.jpeg",
+        "email": "mailto:andrea.cacioppo@uniroma1.it",
+        "sameAs": [
+          "https://www.linkedin.com/in/andrea-cacioppo/"
+        ],
+        "knowsAbout": [
+          "Machine Learning",
+          "Deep Learning",
+          "Quantum Computing",
+          "Physics",
+          "Optimization Algorithms"
+        ],
+        "knowsLanguage": ["it-IT", "en-GB", "de-DE"],
+        "alumniOf": [
+          {
+            "@type": "CollegeOrUniversity",
+            "name": "Sapienza University of Rome"
+          },
+          {
+            "@type": "CollegeOrUniversity",
+            "name": "Technical University of Munich"
+          }
+        ],
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Sapienza University of Rome"
+        },
+        "memberOf": {
+          "@type": "Organization",
+          "name": "Fisica AI&QC group"
+        },
+        "hasOccupation": [
+          {"@type": "Occupation", "name": "Machine Learning Consultant"},
+          {"@type": "Occupation", "name": "Physicist"},
+          {"@type": "Occupation", "name": "Quantum Computing Researcher"}
+        ],
+        "award": [
+          "Excellence program for honor students (2016)",
+          "Research grant: Development of quantum machine learning algorithms (2023–2024)"
+        ],
+        "hasCredential": [
+          {
+            "@type": "EducationalOccupationalCredential",
+            "credentialCategory": "PhD (in progress)",
+            "educationalLevel": "PhD",
+            "recognizedBy": {"@type": "Organization", "name": "Sapienza University of Rome"}
+          },
+          {
+            "@type": "EducationalOccupationalCredential",
+            "credentialCategory": "M.Sc. in Physics",
+            "educationalLevel": "Master's",
+            "recognizedBy": {"@type": "Organization", "name": "Sapienza University of Rome"}
+          },
+          {
+            "@type": "EducationalOccupationalCredential",
+            "credentialCategory": "B.Sc. in Physics",
+            "educationalLevel": "Bachelor's",
+            "recognizedBy": {"@type": "Organization", "name": "Sapienza University of Rome"}
+          }
+        ]
       },
       {
-        "@type": "EducationalOrganization",
-        "name": "Technical University of Munich"
-      }
-    ],
-    "knowsAbout": [
-      "Machine Learning",
-      "Quantum Computing",
-      "Physics",
-      "Optimization Algorithms"
-    ],
-    "worksFor": {
-      "@type": "Organization",
-      "name": "Sapienza University of Rome"
-    },
-    "hasCredential": [
+        "@type": ["WebPage", "ProfilePage"],
+        "@id": "https://andreacacioppo.com/#webpage",
+        "url": "https://andreacacioppo.com/",
+        "name": "Andrea Cacioppo - Curriculum Vitae",
+        "inLanguage": "en",
+        "isPartOf": {"@type": "WebSite", "@id": "https://andreacacioppo.com/#website"},
+        "about": {"@id": "https://andreacacioppo.com/#person"},
+        "primaryImageOfPage": {"@id": "https://andreacacioppo.com/#person"},
+        "dateModified": "2025-07-30"
+      },
       {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "PhD (in progress)",
-        "educationalLevel": "PhD"
+        "@type": "WebSite",
+        "@id": "https://andreacacioppo.com/#website",
+        "url": "https://andreacacioppo.com/",
+        "name": "Andrea Cacioppo",
+        "publisher": {"@id": "https://andreacacioppo.com/#person"},
+        "inLanguage": "en"
       }
     ]
   }
@@ -193,7 +271,7 @@
   <header class="cv-header">
     <img src="images/foto_profilo.jpeg" alt="Profile picture" class="profile-pic" />
     <h1>Andrea Cacioppo</h1>
-    <p>Curriculum vitae - July 30 2025</p>
+    <p>Curriculum vitae - September 7 2025</p>
     <p>
        <img src="images/envelope-fill.svg" alt="Email" class="contact-icon" />
        <a href="mailto:andrea.cacioppo@uniroma1.it">andrea.cacioppo@uniroma1.it</a><br>

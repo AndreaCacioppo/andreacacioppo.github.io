@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# GitHub Pages sitemap
+Sitemap: https://andreacacioppo.com/sitemap.xml
+
