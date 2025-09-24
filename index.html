@@ -72,7 +72,8 @@
       box-shadow: 0 12px 30px rgba(15, 98, 254, 0.25);
       text-transform: uppercase;
       font-size: 0.75rem;
-      transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+      transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease, opacity 200ms ease;
+      will-change: transform, opacity;
     }
 
     .hyperspace-link:hover,
@@ -86,6 +87,13 @@
 
     .hyperspace-link:active {
       transform: translateY(0) scale(0.98);
+    }
+
+    .hyperspace-link.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px) scale(0.96);
+      box-shadow: 0 4px 16px rgba(15, 98, 254, 0.18);
     }
 
     main {
@@ -486,5 +494,42 @@
   </section>
 
 </main>
+  <script>
+    (function() {
+      const hyperspaceLink = document.querySelector('.hyperspace-link');
+      if (!hyperspaceLink) {
+        return;
+      }
+
+      const hiddenClass = 'is-hidden';
+      const threshold = 16;
+      let lastScrollY = window.scrollY;
+
+      function showLink() {
+        hyperspaceLink.classList.remove(hiddenClass);
+      }
+
+      function hideLink() {
+        hyperspaceLink.classList.add(hiddenClass);
+      }
+
+      function handleScroll() {
+        const currentY = window.scrollY;
+        if (currentY <= threshold) {
+          showLink();
+        } else if (currentY > lastScrollY + 2) {
+          hideLink();
+        } else if (currentY < lastScrollY - 2) {
+          showLink();
+        }
+        lastScrollY = currentY;
+      }
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      if (window.scrollY > threshold) {
+        hideLink();
+      }
+    })();
+  </script>
 </body>
 </html>
