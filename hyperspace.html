@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hyperspace</title>
+  <meta name="description" content="Immersive hyperspace light tunnel animation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at center, #050d2b 0%, #030617 40%, #01030b 100%);
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(88, 150, 255, 0.4));
+    }
+
+    .instructions {
+      position: absolute;
+      bottom: 2.5rem;
+      width: 100%;
+      text-align: center;
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(189, 205, 255, 0.55);
+      pointer-events: none;
+      user-select: none;
+      text-shadow: 0 0 12px rgba(43, 75, 255, 0.4);
+    }
+
+    .back-link {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      background: rgba(12, 23, 61, 0.55);
+      border: 1px solid rgba(104, 130, 255, 0.45);
+      color: rgba(214, 224, 255, 0.85);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+      transition: background 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+    }
+
+    .back-link:hover,
+    .back-link:focus-visible {
+      background: rgba(39, 66, 154, 0.75);
+      box-shadow: 0 8px 30px rgba(43, 87, 255, 0.35);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .back-link:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      .instructions {
+        bottom: 1.25rem;
+        font-size: 0.65rem;
+        letter-spacing: 0.25em;
+        padding: 0 2rem;
+      }
+
+      .back-link {
+        top: 1.25rem;
+        left: 1.25rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body {
+        background: radial-gradient(circle at center, #061034 0%, #020513 100%);
+      }
+
+      canvas {
+        display: none;
+      }
+
+      .instructions::after {
+        content: 'Motion reduced';
+        display: block;
+        font-size: 0.65rem;
+        opacity: 0.6;
+        margin-top: 0.5rem;
+        letter-spacing: 0.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="/" aria-label="Return to the main page">Return</a>
+  <canvas id="hyperspace-canvas" role="presentation" aria-hidden="true"></canvas>
+  <p class="instructions">Move to steer · Hold to warp</p>
+  <script>
+    (function() {
+      const canvas = document.getElementById('hyperspace-canvas');
+      const ctx = canvas.getContext('2d');
+      const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const reduceMotion = reduceMotionQuery.matches;
+
+      if (reduceMotion) {
+        return;
+      }
+
+      let width = 0;
+      let height = 0;
+      let devicePixelRatioSafe = Math.min(window.devicePixelRatio || 1, 2);
+      let maxRadius = 0;
+      let centerX = 0;
+      let centerY = 0;
+      let lastTime = performance.now();
+      const rays = [];
+      const rayCount = 420;
+      const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+      let warp = 1;
+
+      function resize() {
+        devicePixelRatioSafe = Math.min(window.devicePixelRatio || 1, 2.5);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * devicePixelRatioSafe;
+        canvas.height = height * devicePixelRatioSafe;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(devicePixelRatioSafe, devicePixelRatioSafe);
+        maxRadius = Math.hypot(width, height) * 0.7;
+        centerX = width / 2;
+        centerY = height / 2;
+      }
+
+      function createRay() {
+        return {
+          angle: Math.random() * Math.PI * 2,
+          progress: Math.random(),
+          speed: 0.18 + Math.random() * 0.32,
+          hue: 188 + Math.random() * 90,
+          pulse: 0.5 + Math.random() * 0.5
+        };
+      }
+
+      for (let i = 0; i < rayCount; i += 1) {
+        rays.push(createRay());
+      }
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function drawCoreGlow() {
+        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius * 0.25);
+        gradient.addColorStop(0, 'rgba(120, 180, 255, 0.35)');
+        gradient.addColorStop(0.35, 'rgba(70, 120, 255, 0.2)');
+        gradient.addColorStop(1, 'rgba(5, 10, 30, 0)');
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, maxRadius * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      function draw(time) {
+        const delta = Math.min((time - lastTime) / 16.6667, 2);
+        lastTime = time;
+
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(2, 5, 18, 0.24)';
+        ctx.fillRect(0, 0, width, height);
+
+        pointer.x += (pointer.targetX - pointer.x) * 0.08;
+        pointer.y += (pointer.targetY - pointer.y) * 0.08;
+        const desiredWarp = isPointerDown ? 3.1 : 1;
+        warp += (desiredWarp - warp) * 0.06;
+        centerX = width / 2 + pointer.x;
+        centerY = height / 2 + pointer.y;
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+
+        for (let i = 0; i < rays.length; i += 1) {
+          const ray = rays[i];
+          ray.progress += ray.speed * warp * delta * 0.018;
+          if (ray.progress > 1) {
+            rays[i] = createRay();
+            continue;
+          }
+
+          const eased = easeOutCubic(ray.progress);
+          const startRadius = eased * maxRadius * 0.1;
+          const endRadius = eased * maxRadius;
+          const cos = Math.cos(ray.angle);
+          const sin = Math.sin(ray.angle);
+          const startX = centerX + cos * startRadius * 0.35;
+          const startY = centerY + sin * startRadius * 0.35;
+          const endX = centerX + cos * (endRadius + 80 * ray.pulse);
+          const endY = centerY + sin * (endRadius + 80 * ray.pulse);
+
+          const gradient = ctx.createLinearGradient(startX, startY, endX, endY);
+          gradient.addColorStop(0, `hsla(${ray.hue}, 100%, 80%, 0)`);
+          gradient.addColorStop(0.1, `hsla(${ray.hue}, 100%, 80%, ${0.15 + 0.35 * (1 - ray.progress)})`);
+          gradient.addColorStop(0.55, `hsla(${ray.hue + 10}, 100%, 65%, ${0.05 + 0.25 * (1 - eased)})`);
+          gradient.addColorStop(1, 'hsla(210, 100%, 60%, 0)');
+
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = Math.max(0.6, (1 - eased) * 3.5);
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+        drawCoreGlow();
+        requestAnimationFrame(draw);
+      }
+
+      let isPointerDown = false;
+
+      function handlePointerMove(event) {
+        if (!event.isPrimary) {
+          return;
+        }
+        pointer.targetX = (event.clientX / width - 0.5) * Math.min(width, 340) * 0.35;
+        pointer.targetY = (event.clientY / height - 0.5) * Math.min(height, 340) * 0.35;
+      }
+
+      function handlePointerDown(event) {
+        if (!event.isPrimary) {
+          return;
+        }
+        isPointerDown = true;
+        handlePointerMove(event);
+      }
+
+      function handlePointerUp(event) {
+        if (event && event.type.startsWith('pointer') && !event.isPrimary) {
+          return;
+        }
+        isPointerDown = false;
+        if (event && event.type === 'pointercancel') {
+          resetPointer();
+        }
+      }
+
+      function resetPointer() {
+        pointer.targetX = 0;
+        pointer.targetY = 0;
+      }
+
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerdown', handlePointerDown);
+      window.addEventListener('pointerup', handlePointerUp);
+      window.addEventListener('pointercancel', handlePointerUp);
+      window.addEventListener('resize', resize);
+      window.addEventListener('pointerout', event => {
+        if (event.pointerType === 'mouse' && event.relatedTarget === null) {
+          handlePointerUp(event);
+          resetPointer();
+        }
+      });
+      window.addEventListener('blur', () => {
+        isPointerDown = false;
+        resetPointer();
+      });
+
+      resize();
+      resetPointer();
+      requestAnimationFrame(draw);
+    })();
+  </script>
+</body>
+</html>
