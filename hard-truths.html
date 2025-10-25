@@ -203,8 +203,7 @@
       font-size: clamp(1.6rem, 3vw, 2.6rem);
       line-height: 1.3;
       letter-spacing: 0.08em;
-      text-transform: uppercase;
-      text-shadow: 0 0 22px rgba(255, 255, 255, 0.08), 0 0 55px rgba(255, 255, 255, 0.05);
+      text-transform: none;
       animation: emerge 4.8s ease forwards;
       opacity: 0;
     }
@@ -222,7 +221,7 @@
       }
       100% {
         opacity: 1;
-        filter: blur(2.5px);
+        filter: blur(0);
         transform: translateY(0);
       }
     }
@@ -289,7 +288,7 @@
     <div class="stars" aria-hidden="true"></div>
     <div class="haze" aria-hidden="true"></div>
     <p class="message">
-      advertising is the most polluting substance in the world
+      Advertising is the most polluting substance in the world
     </p>
   </div>
 </body>
