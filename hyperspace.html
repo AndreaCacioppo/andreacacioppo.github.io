@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hyperspace</title>
-  <meta name="description" content="Immersive hyperspace light tunnel animation.">
+  <meta name="description" content="A quiet expanse where the truth cuts through the haze.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
@@ -21,43 +21,233 @@
 
     body {
       font-family: 'Inter', sans-serif;
-      background: radial-gradient(circle at center, #050d2b 0%, #030617 40%, #01030b 100%);
-      overflow: hidden;
+      background: #030303;
+      color: rgba(255, 255, 255, 0.85);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: rgba(255, 255, 255, 0.7);
+      overflow: hidden;
     }
 
-    canvas {
-      position: absolute;
+    .scene {
+      position: relative;
       inset: 0;
-      width: 100vw;
-      height: 100vh;
-      display: block;
-      filter: drop-shadow(0 0 20px rgba(88, 150, 255, 0.4));
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(15, 15, 15, 0.9) 0%, rgba(0, 0, 0, 0.95) 55%, #000 100%);
+      overflow: hidden;
+    }
+
+    .stars,
+    .stars::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 1px;
+      height: 1px;
+      content: '';
+      background: transparent;
+      box-shadow: 729px -212px rgba(255,255,255,0.16),
+      -139px -918px rgba(255,255,255,0.09),
+      47px -5px rgba(255,255,255,0.11),
+      605px 699px rgba(255,255,255,0.10),
+      -24px -267px rgba(255,255,255,0.14),
+      859px -553px rgba(255,255,255,0.13),
+      -423px -714px rgba(255,255,255,0.16),
+      266px 637px rgba(255,255,255,0.09),
+      863px 90px rgba(255,255,255,0.20),
+      659px 232px rgba(255,255,255,0.19),
+      -365px -798px rgba(255,255,255,0.16),
+      840px 741px rgba(255,255,255,0.15),
+      -34px 146px rgba(255,255,255,0.07),
+      -111px -353px rgba(255,255,255,0.14),
+      869px -582px rgba(255,255,255,0.19),
+      -24px -94px rgba(255,255,255,0.18),
+      -467px -873px rgba(255,255,255,0.17),
+      123px 875px rgba(255,255,255,0.05),
+      473px 720px rgba(255,255,255,0.11),
+      689px 607px rgba(255,255,255,0.15),
+      -998px 253px rgba(255,255,255,0.12),
+      776px -318px rgba(255,255,255,0.09),
+      -334px 441px rgba(255,255,255,0.18),
+      -609px 878px rgba(255,255,255,0.14),
+      -512px 645px rgba(255,255,255,0.20),
+      644px 112px rgba(255,255,255,0.12),
+      -836px -345px rgba(255,255,255,0.18),
+      910px 2px rgba(255,255,255,0.07),
+      128px -404px rgba(255,255,255,0.16),
+      121px -319px rgba(255,255,255,0.17),
+      106px -584px rgba(255,255,255,0.19),
+      235px 120px rgba(255,255,255,0.14),
+      -89px -813px rgba(255,255,255,0.14),
+      -212px -351px rgba(255,255,255,0.14),
+      -406px -624px rgba(255,255,255,0.08),
+      -618px -933px rgba(255,255,255,0.14),
+      344px -468px rgba(255,255,255,0.12),
+      -817px 390px rgba(255,255,255,0.16),
+      795px -694px rgba(255,255,255,0.19),
+      725px -836px rgba(255,255,255,0.18),
+      890px 698px rgba(255,255,255,0.13),
+      -199px 715px rgba(255,255,255,0.16),
+      -436px 68px rgba(255,255,255,0.17),
+      739px -560px rgba(255,255,255,0.18),
+      207px 690px rgba(255,255,255,0.19),
+      187px -437px rgba(255,255,255,0.12),
+      352px 313px rgba(255,255,255,0.20),
+      877px 624px rgba(255,255,255,0.10),
+      -336px 254px rgba(255,255,255,0.07),
+      202px 290px rgba(255,255,255,0.10),
+      -611px -503px rgba(255,255,255,0.05),
+      -445px -761px rgba(255,255,255,0.16),
+      -239px 627px rgba(255,255,255,0.08),
+      -128px 670px rgba(255,255,255,0.06),
+      603px -701px rgba(255,255,255,0.18),
+      -552px -908px rgba(255,255,255,0.17),
+      298px 863px rgba(255,255,255,0.19),
+      233px 393px rgba(255,255,255,0.06),
+      -746px 300px rgba(255,255,255,0.08),
+      700px 179px rgba(255,255,255,0.07),
+      -813px -242px rgba(255,255,255,0.18),
+      -763px -926px rgba(255,255,255,0.14),
+      -602px 968px rgba(255,255,255,0.20),
+      470px -747px rgba(255,255,255,0.12),
+      489px 639px rgba(255,255,255,0.06),
+      391px -954px rgba(255,255,255,0.13),
+      270px -793px rgba(255,255,255,0.18),
+      -857px -548px rgba(255,255,255,0.06),
+      -384px -283px rgba(255,255,255,0.12),
+      -875px 31px rgba(255,255,255,0.12),
+      221px -794px rgba(255,255,255,0.15),
+      -199px -592px rgba(255,255,255,0.09),
+      852px 498px rgba(255,255,255,0.12),
+      847px 881px rgba(255,255,255,0.14),
+      428px 377px rgba(255,255,255,0.08),
+      571px -882px rgba(255,255,255,0.17),
+      -676px 731px rgba(255,255,255,0.07),
+      84px -487px rgba(255,255,255,0.07),
+      887px -95px rgba(255,255,255,0.15),
+      -973px -35px rgba(255,255,255,0.15),
+      843px 165px rgba(255,255,255,0.18),
+      879px -363px rgba(255,255,255,0.15),
+      -205px 715px rgba(255,255,255,0.15),
+      -686px 148px rgba(255,255,255,0.15),
+      -63px 518px rgba(255,255,255,0.06),
+      513px -907px rgba(255,255,255,0.13),
+      -724px -509px rgba(255,255,255,0.16),
+      -14px -279px rgba(255,255,255,0.14),
+      379px -265px rgba(255,255,255,0.14),
+      826px 297px rgba(255,255,255,0.18),
+      -729px 465px rgba(255,255,255,0.10),
+      532px -152px rgba(255,255,255,0.17),
+      -835px -997px rgba(255,255,255,0.14),
+      430px -316px rgba(255,255,255,0.07),
+      -544px 305px rgba(255,255,255,0.12),
+      454px 792px rgba(255,255,255,0.15),
+      791px -152px rgba(255,255,255,0.05),
+      785px 437px rgba(255,255,255,0.14),
+      581px 356px rgba(255,255,255,0.16),
+      -661px -88px rgba(255,255,255,0.06),
+      436px -678px rgba(255,255,255,0.12),
+      812px -3px rgba(255,255,255,0.19),
+      236px 547px rgba(255,255,255,0.05),
+      -921px 12px rgba(255,255,255,0.10),
+      715px -44px rgba(255,255,255,0.06),
+      684px 792px rgba(255,255,255,0.20),
+      -150px -615px rgba(255,255,255,0.13),
+      972px 296px rgba(255,255,255,0.20),
+      715px 485px rgba(255,255,255,0.07),
+      -970px -178px rgba(255,255,255,0.19),
+      -145px -353px rgba(255,255,255,0.05),
+      -971px 469px rgba(255,255,255,0.16),
+      684px 383px rgba(255,255,255,0.13),
+      -800px -610px rgba(255,255,255,0.07),
+      329px -594px rgba(255,255,255,0.18),
+      -427px 410px rgba(255,255,255,0.20),
+      -795px -26px rgba(255,255,255,0.18),
+      -188px 285px rgba(255,255,255,0.06),
+      -438px 871px rgba(255,255,255,0.12),
+      622px -763px rgba(255,255,255,0.18);
+      filter: blur(0.4px);
+      opacity: 0.45;
+      transform: translate(-50%, -50%);
+    }
+
+    .stars::after {
+      transform: translate(-50%, -50%) scale(1.4);
+      opacity: 0.3;
+      filter: blur(0.6px);
+    }
+
+    .haze {
+      position: absolute;
+      inset: -35%;
+      background: radial-gradient(circle at 30% 30%, rgba(60, 60, 60, 0.12) 0%, rgba(20, 20, 20, 0.08) 30%, rgba(0, 0, 0, 0.8) 100%);
+      filter: blur(60px);
+      opacity: 0.7;
+      animation: pulse 12s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0.85; }
+    }
+
+    .message {
+      position: relative;
+      text-align: center;
+      max-width: min(80vw, 34rem);
+      font-size: clamp(1.6rem, 3vw, 2.6rem);
+      line-height: 1.3;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-shadow: 0 0 22px rgba(255, 255, 255, 0.08), 0 0 55px rgba(255, 255, 255, 0.05);
+      animation: emerge 4.8s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes emerge {
+      0% {
+        opacity: 0;
+        filter: blur(40px);
+        transform: translateY(26px);
+      }
+      60% {
+        opacity: 0.7;
+        filter: blur(12px);
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        filter: blur(2.5px);
+        transform: translateY(0);
+      }
     }
 
     .back-link {
-      position: absolute;
+      position: fixed;
       top: 2rem;
       left: 2rem;
-      padding: 0.45rem 0.95rem;
+      padding: 0.5rem 1.1rem;
       border-radius: 999px;
-      background: rgba(12, 23, 61, 0.55);
-      border: 1px solid rgba(104, 130, 255, 0.45);
-      color: rgba(214, 224, 255, 0.85);
+      background: rgba(25, 25, 25, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.75);
       font-size: 0.7rem;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.15em;
       text-decoration: none;
-      transition: background 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+      text-transform: uppercase;
+      transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+      backdrop-filter: blur(5px);
     }
 
     .back-link:hover,
     .back-link:focus-visible {
-      background: rgba(39, 66, 154, 0.75);
-      box-shadow: 0 8px 30px rgba(43, 87, 255, 0.35);
+      color: rgba(255, 255, 255, 0.95);
+      border-color: rgba(255, 255, 255, 0.25);
       transform: translateY(-2px);
       outline: none;
     }
@@ -68,205 +258,39 @@
 
     @media (max-width: 600px) {
       .back-link {
-        top: 1.25rem;
-        left: 1.25rem;
+        top: 1.2rem;
+        left: 1.2rem;
+        letter-spacing: 0.1em;
+      }
+
+      .message {
+        letter-spacing: 0.05em;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      body {
-        background: radial-gradient(circle at center, #061034 0%, #020513 100%);
+      .message {
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+        filter: blur(2.5px);
+        opacity: 1;
+        transform: none;
       }
 
-      canvas {
-        display: none;
+      .haze {
+        animation: none;
       }
     }
   </style>
 </head>
 <body>
-  <a class="back-link" href="/" aria-label="Return to the main page">Return</a>
-  <canvas id="hyperspace-canvas" role="presentation" aria-hidden="true"></canvas>
-  <script>
-    (function() {
-      const canvas = document.getElementById('hyperspace-canvas');
-      const ctx = canvas.getContext('2d');
-      const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      const reduceMotion = reduceMotionQuery.matches;
-
-      if (reduceMotion) {
-        return;
-      }
-
-      let width = 0;
-      let height = 0;
-      let devicePixelRatioSafe = Math.min(window.devicePixelRatio || 1, 2);
-      let maxRadius = 0;
-      let centerX = 0;
-      let centerY = 0;
-      let lastTime = performance.now();
-      const rays = [];
-      const rayCount = 420;
-      const trailLength = 0.22;
-      const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
-      let warp = 1;
-
-      function resize() {
-        devicePixelRatioSafe = Math.min(window.devicePixelRatio || 1, 2.5);
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width * devicePixelRatioSafe;
-        canvas.height = height * devicePixelRatioSafe;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(devicePixelRatioSafe, devicePixelRatioSafe);
-        maxRadius = Math.hypot(width, height) * 0.7;
-        centerX = width / 2;
-        centerY = height / 2;
-      }
-
-      function createRay(initialProgress = Math.random() * trailLength) {
-        return {
-          angle: Math.random() * Math.PI * 2,
-          progress: initialProgress,
-          speed: 0.18 + Math.random() * 0.32,
-          hue: 188 + Math.random() * 90,
-          pulse: 0.5 + Math.random() * 0.5
-        };
-      }
-
-      for (let i = 0; i < rayCount; i += 1) {
-        rays.push(createRay(Math.random()));
-      }
-
-      function easeOutCubic(t) {
-        return 1 - Math.pow(1 - t, 3);
-      }
-
-      function drawCoreGlow() {
-        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius * 0.25);
-        gradient.addColorStop(0, 'rgba(120, 180, 255, 0.35)');
-        gradient.addColorStop(0.35, 'rgba(70, 120, 255, 0.2)');
-        gradient.addColorStop(1, 'rgba(5, 10, 30, 0)');
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, maxRadius * 0.35, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalCompositeOperation = 'source-over';
-      }
-
-      function draw(time) {
-        const delta = Math.min((time - lastTime) / 16.6667, 2);
-        lastTime = time;
-
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(2, 5, 18, 0.24)';
-        ctx.fillRect(0, 0, width, height);
-
-        pointer.x += (pointer.targetX - pointer.x) * 0.08;
-        pointer.y += (pointer.targetY - pointer.y) * 0.08;
-        const desiredWarp = isPointerDown ? 3.1 : 1;
-        warp += (desiredWarp - warp) * 0.06;
-        centerX = width / 2 + pointer.x;
-        centerY = height / 2 + pointer.y;
-
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-
-        for (let i = 0; i < rays.length; i += 1) {
-          const ray = rays[i];
-          ray.progress += ray.speed * warp * delta * 0.018;
-          if (ray.progress > 1 + trailLength) {
-            rays[i] = createRay(0);
-            continue;
-          }
-
-          const clampedProgress = Math.min(ray.progress, 1);
-          const easedEnd = easeOutCubic(clampedProgress);
-          const easedStart = easeOutCubic(Math.max(0, ray.progress - trailLength));
-          const startRadius = easedStart * maxRadius;
-          const endRadius = easedEnd * maxRadius;
-          const cos = Math.cos(ray.angle);
-          const sin = Math.sin(ray.angle);
-          const startX = centerX + cos * (startRadius * 0.6);
-          const startY = centerY + sin * (startRadius * 0.6);
-          const endX = centerX + cos * (endRadius + 90 * ray.pulse);
-          const endY = centerY + sin * (endRadius + 90 * ray.pulse);
-
-          const gradient = ctx.createLinearGradient(startX, startY, endX, endY);
-          gradient.addColorStop(0, `hsla(${ray.hue}, 100%, 78%, 0)`);
-          gradient.addColorStop(0.08, `hsla(${ray.hue}, 100%, 82%, ${0.45 + 0.25 * (1 - clampedProgress)})`);
-          gradient.addColorStop(0.55, `hsla(${ray.hue + 8}, 100%, 70%, ${0.35 + 0.2 * (1 - easedEnd)})`);
-          gradient.addColorStop(0.85, `hsla(${ray.hue + 18}, 100%, 65%, 0.12)`);
-          gradient.addColorStop(1, 'hsla(210, 100%, 60%, 0)');
-
-          ctx.strokeStyle = gradient;
-          ctx.lineCap = 'round';
-          ctx.lineWidth = Math.max(0.7, (1 - easedEnd) * 3.4);
-          ctx.beginPath();
-          ctx.moveTo(startX, startY);
-          ctx.lineTo(endX, endY);
-          ctx.stroke();
-        }
-
-        ctx.restore();
-        drawCoreGlow();
-        requestAnimationFrame(draw);
-      }
-
-      let isPointerDown = false;
-
-      function handlePointerMove(event) {
-        if (!event.isPrimary) {
-          return;
-        }
-        pointer.targetX = (event.clientX / width - 0.5) * Math.min(width, 340) * 0.35;
-        pointer.targetY = (event.clientY / height - 0.5) * Math.min(height, 340) * 0.35;
-      }
-
-      function handlePointerDown(event) {
-        if (!event.isPrimary) {
-          return;
-        }
-        isPointerDown = true;
-        handlePointerMove(event);
-      }
-
-      function handlePointerUp(event) {
-        if (event && event.type.startsWith('pointer') && !event.isPrimary) {
-          return;
-        }
-        isPointerDown = false;
-        if (event && event.type === 'pointercancel') {
-          resetPointer();
-        }
-      }
-
-      function resetPointer() {
-        pointer.targetX = 0;
-        pointer.targetY = 0;
-      }
-
-      window.addEventListener('pointermove', handlePointerMove);
-      window.addEventListener('pointerdown', handlePointerDown);
-      window.addEventListener('pointerup', handlePointerUp);
-      window.addEventListener('pointercancel', handlePointerUp);
-      window.addEventListener('resize', resize);
-      window.addEventListener('pointerout', event => {
-        if (event.pointerType === 'mouse' && event.relatedTarget === null) {
-          handlePointerUp(event);
-          resetPointer();
-        }
-      });
-      window.addEventListener('blur', () => {
-        isPointerDown = false;
-        resetPointer();
-      });
-
-      resize();
-      resetPointer();
-      requestAnimationFrame(draw);
-    })();
-  </script>
+  <a class="back-link" href="/" aria-label="Return to the main page">Hard truths</a>
+  <div class="scene">
+    <div class="stars" aria-hidden="true"></div>
+    <div class="haze" aria-hidden="true"></div>
+    <p class="message">
+      The most polluting substance in the world is advertising
+    </p>
+  </div>
 </body>
 </html>
