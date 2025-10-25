@@ -58,7 +58,7 @@
       padding: 2rem 1rem;
     }
 
-    .hyperspace-link {
+    .hard-truths-link {
       position: fixed;
       top: 1.5rem;
       right: 1.5rem;
@@ -76,8 +76,8 @@
       will-change: transform, opacity;
     }
 
-    .hyperspace-link:hover,
-    .hyperspace-link:focus-visible {
+    .hard-truths-link:hover,
+    .hard-truths-link:focus-visible {
       background: linear-gradient(135deg, rgba(80, 140, 255, 1), rgba(15, 98, 254, 0.8));
       box-shadow: 0 16px 40px rgba(15, 98, 254, 0.35);
       transform: translateY(-2px) scale(1.02);
@@ -85,11 +85,11 @@
       outline: none;
     }
 
-    .hyperspace-link:active {
+    .hard-truths-link:active {
       transform: translateY(0) scale(0.98);
     }
 
-    .hyperspace-link.is-hidden {
+    .hard-truths-link.is-hidden {
       opacity: 0;
       pointer-events: none;
       transform: translateY(-10px) scale(0.96);
@@ -198,7 +198,7 @@
 
     /* Print-specific styles for better PDF rendering */
     @media print {
-      .hyperspace-link {
+      .hard-truths-link {
         display: none !important;
       }
 
@@ -314,7 +314,7 @@
   </script>
 </head>
 <body>
-  <a class="hyperspace-link" href="/hyperspace.html" aria-label="Open the Hyperspace experience">Hyperspace</a>
+  <a class="hard-truths-link" href="/hard-truths.html" aria-label="open the hard truths experience">hard truths</a>
   <main>
   <header class="cv-header">
     <img src="images/foto_profilo.jpeg" alt="Profile picture" class="profile-pic" />
@@ -506,8 +506,8 @@
 </main>
   <script>
     (function() {
-      const hyperspaceLink = document.querySelector('.hyperspace-link');
-      if (!hyperspaceLink) {
+      const hardTruthsLink = document.querySelector('.hard-truths-link');
+      if (!hardTruthsLink) {
         return;
       }
 
@@ -516,11 +516,11 @@
       let lastScrollY = window.scrollY;
 
       function showLink() {
-        hyperspaceLink.classList.remove(hiddenClass);
+        hardTruthsLink.classList.remove(hiddenClass);
       }
 
       function hideLink() {
-        hyperspaceLink.classList.add(hiddenClass);
+        hardTruthsLink.classList.add(hiddenClass);
       }
 
       function handleScroll() {
