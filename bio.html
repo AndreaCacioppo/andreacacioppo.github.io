@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>bio</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -151,10 +152,10 @@
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 
-const CHAR_W = 11;
-const CHAR_H = 17;
-const FONT_SIZE = 14;
-const FONT = `${FONT_SIZE}px "Courier New", monospace`;
+let CHAR_W = 11;
+let CHAR_H = 17;
+let FONT_SIZE = 14;
+let FONT = `${FONT_SIZE}px "Courier New", monospace`;
 
 let W, H, cols, rows;
 let glowA, glowB; // double-buffered glow grids
@@ -173,8 +174,19 @@ const charsMid   = ['\u00B7', '-', '~', '\u2248', '\u223F'];   // mid-wave: visi
 const charsCrest = ['~', '\u2248', '\u2591', '\u2591', '*'];    // crests: block chars for strongest peaks
 
 function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
+  const dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Scale character size for smaller screens
+  FONT_SIZE = Math.max(8, Math.min(14, Math.round(W / 85)));
+  CHAR_W = Math.round(FONT_SIZE * 0.79);
+  CHAR_H = Math.round(FONT_SIZE * 1.21);
+  FONT = `${FONT_SIZE}px "Courier New", monospace`;
   cols = Math.ceil(W / CHAR_W) + 1;
   rows = Math.ceil(H / CHAR_H) + 1;
   const size = cols * rows;

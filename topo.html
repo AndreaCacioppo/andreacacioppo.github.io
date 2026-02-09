@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>topo</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -87,10 +88,10 @@ const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 
 // Character cell dimensions
-const CHAR_W = 10;
-const CHAR_H = 16;
-const FONT_SIZE = 13;
-const FONT = `${FONT_SIZE}px "Courier New", monospace`;
+let CHAR_W = 10;
+let CHAR_H = 16;
+let FONT_SIZE = 13;
+let FONT = `${FONT_SIZE}px "Courier New", monospace`;
 
 let W, H, cols, rows;
 
@@ -426,8 +427,19 @@ function getTerrainColor(h) {
 // --- Resize handler ---
 
 function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
+  const dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Scale character size for smaller screens
+  FONT_SIZE = Math.max(8, Math.min(13, Math.round(W / 85)));
+  CHAR_W = Math.round(FONT_SIZE * 0.77);
+  CHAR_H = Math.round(FONT_SIZE * 1.23);
+  FONT = `${FONT_SIZE}px "Courier New", monospace`;
   cols = Math.ceil(W / CHAR_W) + 1;
   rows = Math.ceil(H / CHAR_H) + 1;
   initHeightMap();

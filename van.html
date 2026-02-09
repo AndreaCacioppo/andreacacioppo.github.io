@@ -169,8 +169,8 @@ const TIERS = [
 const SWIRL = ['~', '≈', '∿', '⌇', '∞', '∾', '≋', '⟳'];
 const STAR_CH = ['✦', '✧', '⊹', '∗', '⋆', '✶', '✴'];
 
-const CHAR_W = 9;
-const CHAR_H = 15;
+let CHAR_W = 9;
+let CHAR_H = 15;
 let W, H, cols, rows;
 let gridData = null;
 let cachedImg = null;
@@ -184,6 +184,10 @@ function resize() {
   canvas.style.width = W + 'px';
   canvas.style.height = H + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Scale character size for smaller screens
+  const baseFontSize = Math.max(8, Math.min(13, Math.round(W / 85)));
+  CHAR_H = baseFontSize + 2;
+  CHAR_W = Math.round(CHAR_H * 0.6);
   cols = Math.ceil(W / CHAR_W);
   rows = Math.ceil(H / CHAR_H);
   if (cachedImg) coarseGrain(cachedImg);

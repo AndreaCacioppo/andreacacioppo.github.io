@@ -174,7 +174,7 @@ function resize() {
   canvas.width = window.innerWidth * dpr;
   canvas.height = window.innerHeight * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  fontSize = BASE_FONT;
+  fontSize = Math.max(8, Math.min(BASE_FONT, Math.round(window.innerWidth / 85)));
   ctx.font = fontSize + 'px Courier New, Courier, monospace';
   charW = ctx.measureText('@').width;
   charH = fontSize * 1.2;
