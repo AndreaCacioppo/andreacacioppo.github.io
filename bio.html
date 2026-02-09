@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bioluminescent Sea</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; cursor: none; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+const CHAR_W = 11;
+const CHAR_H = 17;
+const FONT_SIZE = 14;
+const FONT = `${FONT_SIZE}px "Courier New", monospace`;
+
+let W, H, cols, rows;
+let glowA, glowB; // double-buffered glow grids
+let useA = true;
+
+// Mouse state
+let mx = -1, my = -1, pmx = -1, pmy = -1;
+let speed = 0;
+let time = 0;
+let frameCount = 0;
+
+// Thin characters ordered by visual weight (calm → active)
+const chars = [' ', '·', '.', ',', '\'', '-', '~', '˜', '~', '≈'];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  cols = Math.ceil(W / CHAR_W) + 1;
+  rows = Math.ceil(H / CHAR_H) + 1;
+  const size = cols * rows;
+  glowA = new Float32Array(size);
+  glowB = new Float32Array(size);
+  ripples.length = 0;
+}
+
+// --- Sea simulation ---
+
+function seaHeight(x, y, t) {
+  let h = 0;
+  // Deep swells — large, slow
+  h += Math.sin(x * 0.035 + t * 0.55) * 0.35;
+  h += Math.sin(y * 0.05 + t * 0.35 + 1.3) * 0.18;
+  // Cross-waves
+  h += Math.sin(x * 0.08 + y * 0.025 - t * 0.75) * 0.22;
+  h += Math.sin(x * 0.06 - y * 0.04 + t * 0.6 + 2.1) * 0.12;
+  // Surface ripples
+  h += Math.sin(x * 0.18 + t * 1.4) * 0.07;
+  h += Math.sin(y * 0.15 + t * 1.0 + x * 0.04) * 0.05;
+  // Fine detail
+  h += Math.sin(x * 0.28 + y * 0.2 - t * 0.4 + 4.0) * 0.03;
+  h += Math.sin(x * 0.13 + y * 0.31 + t * 0.9) * 0.03;
+  return h;
+}
+
+// Current field for advecting bioluminescence
+function currentFieldX(x, y, t) {
+  return 0.02 + Math.sin(y * 0.04 + t * 0.18) * 0.015 + Math.sin(x * 0.03 + t * 0.1) * 0.01;
+}
+
+function currentFieldY(x, y, t) {
+  return Math.sin(x * 0.035 + t * 0.12) * 0.01 + Math.cos(y * 0.05 + t * 0.15) * 0.007;
+}
+
+function pickChar(height) {
+  // Map roughly -1..1 to character index
+  const norm = (height + 1) * 0.5; // 0..1
+  const i = Math.floor(norm * (chars.length - 0.01));
+  return chars[Math.max(0, Math.min(chars.length - 1, i))];
+}
+
+// Base color for sea: dark navy, slightly varied
+function seaColor(height) {
+  // Darker in troughs, slightly lighter at crests
+  const norm = (height + 1) * 0.5;
+  const r = 14 + norm * 18 | 0;
+  const g = 28 + norm * 40 | 0;
+  const b = 70 + norm * 65 | 0;
+  return [r, g, b];
+}
+
+// --- Bioluminescence ---
+
+const DECAY = 0.955;          // per-frame decay for the residual trail
+const SPREAD = 0.008;         // very subtle diffusion
+const MOUSE_RADIUS = 1.5;     // thin direct trace
+const MAX_GLOW = 1.5;
+
+// Ripple system
+const MAX_RIPPLES = 120;
+const RIPPLE_SPEED = 0.25;     // cells per frame expansion
+const RIPPLE_DECAY = 0.45;     // exponential decay rate per radius unit
+const RIPPLE_WIDTH = 1.8;      // ring thickness in cells
+const RIPPLE_MAX_RADIUS = 35;  // max expansion before removal
+
+const ripples = [];
+
+function spawnRipple(col, row, intensity) {
+  if (ripples.length >= MAX_RIPPLES) ripples.shift();
+  ripples.push({ col, row, radius: 0.5, intensity, age: 0 });
+}
+
+function addGlow(col, row, intensity) {
+  const src = useA ? glowA : glowB;
+  const r2 = MOUSE_RADIUS;
+  for (let dy = -2; dy <= 2; dy++) {
+    for (let dx = -2; dx <= 2; dx++) {
+      const c = col + dx, r = row + dy;
+      if (c < 0 || c >= cols || r < 0 || r >= rows) continue;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > r2) continue;
+      const falloff = 1 - dist / (r2 + 0.5);
+      const idx = r * cols + c;
+      src[idx] = Math.min(MAX_GLOW, src[idx] + intensity * falloff * falloff);
+    }
+  }
+}
+
+function updateRipples() {
+  const src = useA ? glowA : glowB;
+
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    const rip = ripples[i];
+    rip.radius += RIPPLE_SPEED;
+    rip.age++;
+
+    if (rip.radius > RIPPLE_MAX_RADIUS) {
+      ripples.splice(i, 1);
+      continue;
+    }
+
+    // Exponential decay with radius
+    const ringIntensity = rip.intensity * Math.exp(-RIPPLE_DECAY * rip.radius);
+    if (ringIntensity < 0.003) {
+      ripples.splice(i, 1);
+      continue;
+    }
+
+    // Only iterate over cells near the ring
+    const rMin = Math.max(0, Math.floor(rip.row - rip.radius - 2));
+    const rMax = Math.min(rows - 1, Math.ceil(rip.row + rip.radius + 2));
+    const cMin = Math.max(0, Math.floor(rip.col - rip.radius - 2));
+    const cMax = Math.min(cols - 1, Math.ceil(rip.col + rip.radius + 2));
+
+    for (let r = rMin; r <= rMax; r++) {
+      for (let c = cMin; c <= cMax; c++) {
+        const dx = c - rip.col;
+        const dy = r - rip.row;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const ringDist = Math.abs(dist - rip.radius);
+
+        if (ringDist < RIPPLE_WIDTH) {
+          // Smooth ring profile (Gaussian-ish)
+          const profile = Math.exp(-(ringDist * ringDist) / (RIPPLE_WIDTH * 0.5));
+          const idx = r * cols + c;
+          src[idx] = Math.min(MAX_GLOW, src[idx] + ringIntensity * profile * 0.4);
+        }
+      }
+    }
+  }
+}
+
+function advectAndDecayGlow() {
+  // First apply ripples to current buffer
+  updateRipples();
+
+  const src = useA ? glowA : glowB;
+  const dst = useA ? glowB : glowA;
+  dst.fill(0);
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cx = currentFieldX(c, r, time);
+      const cy = currentFieldY(c, r, time);
+      const srcX = c - cx;
+      const srcY = r - cy;
+
+      const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
+      const fx = srcX - x0, fy = srcY - y0;
+
+      let val = 0;
+      for (let oy = 0; oy <= 1; oy++) {
+        for (let ox = 0; ox <= 1; ox++) {
+          const sc = x0 + ox, sr = y0 + oy;
+          if (sc >= 0 && sc < cols && sr >= 0 && sr < rows) {
+            const weight = (ox ? fx : 1 - fx) * (oy ? fy : 1 - fy);
+            val += src[sr * cols + sc] * weight;
+          }
+        }
+      }
+
+      let neighbors = 0, nCount = 0;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          const nc = c + dx, nr = r + dy;
+          if (nc >= 0 && nc < cols && nr >= 0 && nr < rows) {
+            neighbors += src[nr * cols + nc];
+            nCount++;
+          }
+        }
+      }
+
+      const diffused = nCount > 0 ? neighbors / nCount : 0;
+      val = val * (1 - SPREAD) + diffused * SPREAD;
+
+      dst[r * cols + c] = val * DECAY;
+    }
+  }
+
+  useA = !useA;
+}
+
+// --- Rendering ---
+
+function render() {
+  time += 0.018;
+  frameCount++;
+
+  // Process mouse input
+  if (mx >= 0 && pmx >= 0) {
+    const dx = mx - pmx, dy = my - pmy;
+    speed = Math.sqrt(dx * dx + dy * dy);
+    const intensity = Math.min(speed * 0.04, 1.2);
+
+    if (intensity > 0.005) {
+      const col = Math.floor(mx / CHAR_W);
+      const row = Math.floor(my / CHAR_H);
+      addGlow(col, row, intensity * 0.7);
+
+      // Spawn ripple — throttle to avoid flooding
+      if (frameCount % 3 === 0 || speed > 15) {
+        spawnRipple(col, row, intensity);
+      }
+
+      // Interpolate along fast movements
+      if (speed > CHAR_W) {
+        const steps = Math.ceil(speed / CHAR_W);
+        for (let s = 1; s < steps; s++) {
+          const t = s / steps;
+          const ic = Math.floor((pmx + dx * t) / CHAR_W);
+          const ir = Math.floor((pmy + dy * t) / CHAR_H);
+          addGlow(ic, ir, intensity * 0.5 * (1 - t * 0.3));
+        }
+      }
+    }
+  }
+  pmx = mx; pmy = my;
+
+  // Advect bioluminescence with currents
+  advectAndDecayGlow();
+
+  const glow = useA ? glowA : glowB;
+
+  // Clear
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+  ctx.font = FONT;
+  ctx.textBaseline = 'top';
+
+  // Batch by quantized color for performance
+  // We'll render in a single pass, accepting per-char fillStyle changes
+  // but skipping empty/invisible cells
+
+  for (let r = 0; r < rows; r++) {
+    const py = r * CHAR_H;
+    if (py > H) break;
+    for (let c = 0; c < cols; c++) {
+      const px = c * CHAR_W;
+      if (px > W) break;
+
+      const h = seaHeight(c, r, time);
+      const ch = pickChar(h);
+      if (ch === ' ') continue; // skip empty
+
+      const g = glow[r * cols + c];
+      const [br, bg, bb] = seaColor(h);
+
+      let red, green, blue;
+      if (g > 0.005) {
+        // Bioluminescence color: electric cyan-blue
+        // Two-tone glow: core is white-cyan, outer is electric blue
+        const g2 = Math.min(g, 1.0);
+        const g3 = g2 * g2; // quadratic for more pop
+
+        // Electric blue target: rgb(50, 210, 255) with white core
+        const glowR = 30 + g3 * 200;  // whites out at high intensity
+        const glowG = 190 + g3 * 65;
+        const glowB = 255;
+
+        red   = br + (glowR - br) * g2 | 0;
+        green = bg + (glowG - bg) * g2 | 0;
+        blue  = bb + (glowB - bb) * g2 | 0;
+
+        // Clamp
+        red = Math.min(255, red);
+        green = Math.min(255, green);
+        blue = Math.min(255, blue);
+      } else {
+        red = br; green = bg; blue = bb;
+      }
+
+      ctx.fillStyle = `rgb(${red},${green},${blue})`;
+      ctx.fillText(ch, px, py);
+    }
+  }
+
+  requestAnimationFrame(render);
+}
+
+// --- Events ---
+
+window.addEventListener('resize', resize);
+
+canvas.addEventListener('mousemove', e => {
+  mx = e.clientX;
+  my = e.clientY;
+});
+
+canvas.addEventListener('mouseleave', () => {
+  mx = my = pmx = pmy = -1;
+  speed = 0;
+});
+
+// Touch support
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  mx = t.clientX;
+  my = t.clientY;
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => {
+  mx = my = pmx = pmy = -1;
+  speed = 0;
+});
+
+resize();
+requestAnimationFrame(render);
+</script>
+</body>
+</html>

@@ -18,9 +18,72 @@
     font-family: 'Fira Code', monospace;
   }
   canvas { display: block; }
+
+  .bio-link {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(8, 8, 22, 0.7);
+    border: 1px solid rgba(100, 160, 220, 0.15);
+    color: rgba(100, 160, 220, 0.65);
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bio-link:hover,
+  .bio-link:focus-visible {
+    color: rgba(120, 200, 255, 0.95);
+    border-color: rgba(100, 160, 220, 0.4);
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .bio-link:hover svg {
+    filter: drop-shadow(0 0 6px rgba(100, 180, 255, 0.5));
+  }
+
+  .bio-link:active {
+    transform: translateY(0);
+  }
+
+  .bio-link svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: wave-drift 4s ease-in-out infinite;
+  }
+
+  @keyframes wave-drift {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
+  }
+
+  @media (max-width: 600px) {
+    .bio-link {
+      top: 1.2rem;
+      right: 1.2rem;
+    }
+  }
 </style>
 </head>
 <body>
+<a class="bio-link" href="/bio.html" aria-label="bioluminescent sea">
+  <svg viewBox="0 0 24 24" stroke-width="1.6">
+    <path d="M2 12 C4 9, 6 9, 8 12 S12 15, 14 12 S18 9, 20 12"/>
+    <path d="M2 16 C4 13, 6 13, 8 16 S12 19, 14 16 S18 13, 20 16" stroke-width="1.2" opacity="0.6"/>
+    <path d="M2 8 C4 5, 6 5, 8 8 S12 11, 14 8 S18 5, 20 8" stroke-width="1.0" opacity="0.4"/>
+  </svg>
+</a>
 <canvas id="canvas"></canvas>
 
 <script>
