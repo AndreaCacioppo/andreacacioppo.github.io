@@ -21,225 +21,16 @@
 
     body {
       font-family: 'Share Tech Mono', 'Courier New', monospace;
-      background: #030303;
+      background: #000;
       color: rgba(0, 255, 65, 0.85);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
 
-    .scene {
-      position: relative;
-      inset: 0;
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at center, rgba(15, 15, 15, 0.9) 0%, rgba(0, 0, 0, 0.95) 55%, #000 100%);
-      overflow: hidden;
-    }
-
-    .matrix-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      mix-blend-mode: screen;
-      opacity: 0.35;
-      z-index: 1;
-    }
-
-    .stars,
-    .stars::after {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 1px;
-      height: 1px;
-      content: '';
-      background: transparent;
-      box-shadow: 729px -212px rgba(255,255,255,0.16),
-      -139px -918px rgba(255,255,255,0.09),
-      47px -5px rgba(255,255,255,0.11),
-      605px 699px rgba(255,255,255,0.10),
-      -24px -267px rgba(255,255,255,0.14),
-      859px -553px rgba(255,255,255,0.13),
-      -423px -714px rgba(255,255,255,0.16),
-      266px 637px rgba(255,255,255,0.09),
-      863px 90px rgba(255,255,255,0.20),
-      659px 232px rgba(255,255,255,0.19),
-      -365px -798px rgba(255,255,255,0.16),
-      840px 741px rgba(255,255,255,0.15),
-      -34px 146px rgba(255,255,255,0.07),
-      -111px -353px rgba(255,255,255,0.14),
-      869px -582px rgba(255,255,255,0.19),
-      -24px -94px rgba(255,255,255,0.18),
-      -467px -873px rgba(255,255,255,0.17),
-      123px 875px rgba(255,255,255,0.05),
-      473px 720px rgba(255,255,255,0.11),
-      689px 607px rgba(255,255,255,0.15),
-      -998px 253px rgba(255,255,255,0.12),
-      776px -318px rgba(255,255,255,0.09),
-      -334px 441px rgba(255,255,255,0.18),
-      -609px 878px rgba(255,255,255,0.14),
-      -512px 645px rgba(255,255,255,0.20),
-      644px 112px rgba(255,255,255,0.12),
-      -836px -345px rgba(255,255,255,0.18),
-      910px 2px rgba(255,255,255,0.07),
-      128px -404px rgba(255,255,255,0.16),
-      121px -319px rgba(255,255,255,0.17),
-      106px -584px rgba(255,255,255,0.19),
-      235px 120px rgba(255,255,255,0.14),
-      -89px -813px rgba(255,255,255,0.14),
-      -212px -351px rgba(255,255,255,0.14),
-      -406px -624px rgba(255,255,255,0.08),
-      -618px -933px rgba(255,255,255,0.14),
-      344px -468px rgba(255,255,255,0.12),
-      -817px 390px rgba(255,255,255,0.16),
-      795px -694px rgba(255,255,255,0.19),
-      725px -836px rgba(255,255,255,0.18),
-      890px 698px rgba(255,255,255,0.13),
-      -199px 715px rgba(255,255,255,0.16),
-      -436px 68px rgba(255,255,255,0.17),
-      739px -560px rgba(255,255,255,0.18),
-      207px 690px rgba(255,255,255,0.19),
-      187px -437px rgba(255,255,255,0.12),
-      352px 313px rgba(255,255,255,0.20),
-      877px 624px rgba(255,255,255,0.10),
-      -336px 254px rgba(255,255,255,0.07),
-      202px 290px rgba(255,255,255,0.10),
-      -611px -503px rgba(255,255,255,0.05),
-      -445px -761px rgba(255,255,255,0.16),
-      -239px 627px rgba(255,255,255,0.08),
-      -128px 670px rgba(255,255,255,0.06),
-      603px -701px rgba(255,255,255,0.18),
-      -552px -908px rgba(255,255,255,0.17),
-      298px 863px rgba(255,255,255,0.19),
-      233px 393px rgba(255,255,255,0.06),
-      -746px 300px rgba(255,255,255,0.08),
-      700px 179px rgba(255,255,255,0.07),
-      -813px -242px rgba(255,255,255,0.18),
-      -763px -926px rgba(255,255,255,0.14),
-      -602px 968px rgba(255,255,255,0.20),
-      470px -747px rgba(255,255,255,0.12),
-      489px 639px rgba(255,255,255,0.06),
-      391px -954px rgba(255,255,255,0.13),
-      270px -793px rgba(255,255,255,0.18),
-      -857px -548px rgba(255,255,255,0.06),
-      -384px -283px rgba(255,255,255,0.12),
-      -875px 31px rgba(255,255,255,0.12),
-      221px -794px rgba(255,255,255,0.15),
-      -199px -592px rgba(255,255,255,0.09),
-      852px 498px rgba(255,255,255,0.12),
-      847px 881px rgba(255,255,255,0.14),
-      428px 377px rgba(255,255,255,0.08),
-      571px -882px rgba(255,255,255,0.17),
-      -676px 731px rgba(255,255,255,0.07),
-      84px -487px rgba(255,255,255,0.07),
-      887px -95px rgba(255,255,255,0.15),
-      -973px -35px rgba(255,255,255,0.15),
-      843px 165px rgba(255,255,255,0.18),
-      879px -363px rgba(255,255,255,0.15),
-      -205px 715px rgba(255,255,255,0.15),
-      -686px 148px rgba(255,255,255,0.15),
-      -63px 518px rgba(255,255,255,0.06),
-      513px -907px rgba(255,255,255,0.13),
-      -724px -509px rgba(255,255,255,0.16),
-      -14px -279px rgba(255,255,255,0.14),
-      379px -265px rgba(255,255,255,0.14),
-      826px 297px rgba(255,255,255,0.18),
-      -729px 465px rgba(255,255,255,0.10),
-      532px -152px rgba(255,255,255,0.17),
-      -835px -997px rgba(255,255,255,0.14),
-      430px -316px rgba(255,255,255,0.07),
-      -544px 305px rgba(255,255,255,0.12),
-      454px 792px rgba(255,255,255,0.15),
-      791px -152px rgba(255,255,255,0.05),
-      785px 437px rgba(255,255,255,0.14),
-      581px 356px rgba(255,255,255,0.16),
-      -661px -88px rgba(255,255,255,0.06),
-      436px -678px rgba(255,255,255,0.12),
-      812px -3px rgba(255,255,255,0.19),
-      236px 547px rgba(255,255,255,0.05),
-      -921px 12px rgba(255,255,255,0.10),
-      715px -44px rgba(255,255,255,0.06),
-      684px 792px rgba(255,255,255,0.20),
-      -150px -615px rgba(255,255,255,0.13),
-      972px 296px rgba(255,255,255,0.20),
-      715px 485px rgba(255,255,255,0.07),
-      -970px -178px rgba(255,255,255,0.19),
-      -145px -353px rgba(255,255,255,0.05),
-      -971px 469px rgba(255,255,255,0.16),
-      684px 383px rgba(255,255,255,0.13),
-      -800px -610px rgba(255,255,255,0.07),
-      329px -594px rgba(255,255,255,0.18),
-      -427px 410px rgba(255,255,255,0.20),
-      -795px -26px rgba(255,255,255,0.18),
-      -188px 285px rgba(255,255,255,0.06),
-      -438px 871px rgba(255,255,255,0.12),
-      622px -763px rgba(255,255,255,0.18);
-      filter: blur(0.4px);
-      opacity: 0.45;
-      transform: translate(-50%, -50%);
-      z-index: 0;
-    }
-
-    .stars::after {
-      transform: translate(-50%, -50%) scale(1.4);
-      opacity: 0.3;
-      filter: blur(0.6px);
-    }
-
-    .haze {
-      position: absolute;
-      inset: -35%;
-      background: radial-gradient(circle at 30% 30%, rgba(60, 60, 60, 0.12) 0%, rgba(20, 20, 20, 0.08) 30%, rgba(0, 0, 0, 0.8) 100%);
-      filter: blur(60px);
-      opacity: 0.7;
-      animation: pulse 12s ease-in-out infinite;
-      z-index: 2;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 0.85; }
-    }
-
-    .message {
-      position: relative;
-      z-index: 3;
-      text-align: center;
-      max-width: min(80vw, 34rem);
-      font-size: clamp(1.6rem, 3vw, 2.6rem);
-      line-height: 1.3;
-      letter-spacing: 0.08em;
-      text-transform: none;
-      animation: emerge 4.8s ease forwards;
-      opacity: 0;
-      color: #00ff41;
-      text-shadow: 0 0 8px rgba(0, 255, 65, 0.4), 0 0 20px rgba(0, 255, 65, 0.15);
-    }
-
-    @keyframes emerge {
-      0% {
-        opacity: 0;
-        filter: blur(40px);
-        transform: translateY(26px);
-      }
-      60% {
-        opacity: 0.7;
-        filter: blur(12px);
-        transform: translateY(8px);
-      }
-      100% {
-        opacity: 1;
-        filter: blur(0);
-        transform: translateY(0);
-      }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
     }
 
     .back-link {
@@ -258,6 +49,7 @@
       text-transform: uppercase;
       transition: color 200ms ease, border-color 200ms ease, transform 200ms ease, text-shadow 200ms ease;
       backdrop-filter: blur(5px);
+      z-index: 10;
     }
 
     .back-link:hover,
@@ -329,24 +121,6 @@
         top: 1.2rem;
         right: 1.2rem;
       }
-
-      .message {
-        letter-spacing: 0.05em;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .message {
-        animation-duration: 0.01ms;
-        animation-iteration-count: 1;
-        filter: blur(2.5px);
-        opacity: 1;
-        transform: none;
-      }
-
-      .haze {
-        animation: none;
-      }
     }
   </style>
 </head>
@@ -365,93 +139,374 @@
       <line x1="18" y1="16" x2="22" y2="16.5" stroke-width="1"/>
     </svg>
   </a>
-  <div class="scene">
-    <div class="stars" aria-hidden="true"></div>
-    <canvas class="matrix-canvas" aria-hidden="true"></canvas>
-    <div class="haze" aria-hidden="true"></div>
-    <p class="message">
-      Advertising is the most toxic pollutant in the world
-    </p>
-  </div>
+  <canvas id="grid" aria-hidden="true"></canvas>
 
   <script>
-    const canvas = document.querySelector('.matrix-canvas');
-    const ctx = canvas.getContext('2d');
-    const characters = '01';
-    const fontSize = 16;
-    let width = 0;
-    let height = 0;
-    let columns = 0;
-    let drops = [];
-    let animationHandle = null;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // ── Broad ASCII character set for a chaotic, textured grid ──
+    // Wide variety of glyphs: digits, letters, symbols, punctuation, math,
+    // brackets, slashes -- produces a dense, noisy visual field.
+    const CHARS = '0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()-_=+[]{}|;:,.<>?/~`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef0101';
 
-    function resizeCanvas() {
-      const dpr = window.devicePixelRatio || 1;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      canvas.width = viewportWidth * dpr;
-      canvas.height = viewportHeight * dpr;
-      canvas.style.width = viewportWidth + 'px';
-      canvas.style.height = viewportHeight + 'px';
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-      width = viewportWidth;
-      height = viewportHeight;
-      columns = Math.ceil(width / fontSize);
-      drops = Array(columns).fill(0);
+    function randChar() {
+      return CHARS[Math.floor(Math.random() * CHARS.length)];
     }
 
-    function draw() {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.fillRect(0, 0, width, height);
+    // ── 5x5 bitmap font for A-Z, space, and basic punctuation ──
+    const FONT = {
+      'A': ['.###.','#...#','#####','#...#','#...#'],
+      'B': ['####.','#...#','####.','#...#','####.'],
+      'C': ['.####','#....','#....','#....','.####'],
+      'D': ['####.','#...#','#...#','#...#','####.'],
+      'E': ['#####','#....','###..','#....','#####'],
+      'F': ['#####','#....','###..','#....','#....'],
+      'G': ['.####','#....','#.###','#...#','.###.'],
+      'H': ['#...#','#...#','#####','#...#','#...#'],
+      'I': ['#####','..#..','..#..','..#..','#####'],
+      'J': ['..###','...#.','...#.','#..#.','.##..'],
+      'K': ['#...#','#..#.','###..','#..#.','#...#'],
+      'L': ['#....','#....','#....','#....','#####'],
+      'M': ['#...#','##.##','#.#.#','#...#','#...#'],
+      'N': ['#...#','##..#','#.#.#','#..##','#...#'],
+      'O': ['.###.','#...#','#...#','#...#','.###.'],
+      'P': ['####.','#...#','####.','#....','#....'],
+      'Q': ['.###.','#...#','#.#.#','#..#.','.##.#'],
+      'R': ['####.','#...#','####.','#..#.','#...#'],
+      'S': ['.####','#....','.###.','....#','####.'],
+      'T': ['#####','..#..','..#..','..#..','..#..'],
+      'U': ['#...#','#...#','#...#','#...#','.###.'],
+      'V': ['#...#','#...#','.#.#.','.#.#.','..#..'],
+      'W': ['#...#','#...#','#.#.#','##.##','#...#'],
+      'X': ['#...#','.#.#.','..#..','.#.#.','#...#'],
+      'Y': ['#...#','.#.#.','..#..','..#..','..#..'],
+      'Z': ['#####','...#.','..#..','.#...','#####'],
+      ' ': ['.....','.....','.....','.....','.....'],
+      '.': ['.....','.....','.....','.....','..#..'],
+      ',': ['.....','.....','.....','..#..','.#...'],
+      '!': ['..#..','..#..','..#..','.....','..#..'],
+      '?': ['.###.','#...#','..##.','.....','..#..'],
+      "'": ['..#..','..#..','.....','.....','.....',],
+      '-': ['.....','.....','..#..','.....','.....'],
+    };
 
-      ctx.fillStyle = 'rgba(0, 255, 80, 0.65)';
-      ctx.font = fontSize + "px 'Courier New', monospace";
+    const MESSAGE = 'ADVERTISING IS THE MOST TOXIC POLLUTANT IN THE WORLD';
+    const CHAR_WIDTH = 5;
+    const CHAR_HEIGHT = 5;
+    const CHAR_GAP = 1;
+    const LINE_GAP = 2;
 
-      for (let i = 0; i < columns; i++) {
-        const text = characters.charAt(Math.floor(Math.random() * characters.length));
-        const x = i * fontSize;
-        const y = drops[i] * fontSize;
+    const canvas = document.getElementById('grid');
+    const ctx = canvas.getContext('2d');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-        ctx.fillText(text, x, y);
+    // ── Grid state ──
+    let cols = 0;
+    let rows = 0;
+    let cellW = 0;
+    let cellH = 0;
+    let fontSize = 12;
 
-        if (y > height && Math.random() > 0.975) {
-          drops[i] = 0;
+    // Per-cell state
+    let cellChars = null;      // flat array of characters
+    let cellTimers = null;     // flat Float32Array: ms until next character change
+    let cellAlpha = null;      // flat Float32Array: per-cell brightness (0-1 scale)
+    let messageMask = null;    // flat Uint8Array: 1 if cell is part of message shape
+    let revealedMask = null;   // flat Uint8Array: 1 if cell has been revealed
+
+    function idx(r, c) { return r * cols + c; }
+
+    // ── Timing: slightly slower than before for a quieter feel ──
+    // Background cells change at a leisurely pace
+    const BG_MIN_MS = 300;
+    const BG_MAX_MS = 3000;
+    // Message cells change a bit faster but still unhurried
+    const MSG_MIN_MS = 120;
+    const MSG_MAX_MS = 800;
+
+    function randBgTimer() {
+      return BG_MIN_MS + Math.random() * (BG_MAX_MS - BG_MIN_MS);
+    }
+    function randMsgTimer() {
+      return MSG_MIN_MS + Math.random() * (MSG_MAX_MS - MSG_MIN_MS);
+    }
+
+    // ── Per-cell background brightness: random value in a range ──
+    // Creates spatial variation -- some cells slightly brighter, some dimmer
+    // Range: 0.06 to 0.18, centered around 0.13
+    function randBgAlpha() {
+      return 0.06 + Math.random() * 0.12;
+    }
+
+    // Message cell brightness: subtle, close to background but still readable
+    // Range: 0.30 to 0.38
+    function randMsgAlpha() {
+      return 0.30 + Math.random() * 0.08;
+    }
+
+    // ── Progressive reveal state ──
+    let messageCells = [];
+    let revealedCount = 0;
+    let fullyRevealed = false;
+    let revealAccum = 0;
+    const REVEAL_RATE = 18;
+
+    // ── Word-wrap ──
+    function wrapMessage(maxCols) {
+      const words = MESSAGE.split(' ');
+      const lines = [];
+      let current = '';
+
+      for (const word of words) {
+        const wordW = word.length * (CHAR_WIDTH + CHAR_GAP) - CHAR_GAP;
+        const curW = current.length > 0
+          ? current.length * (CHAR_WIDTH + CHAR_GAP) - CHAR_GAP
+          : 0;
+        const spaceW = CHAR_WIDTH + CHAR_GAP;
+
+        if (current.length === 0) {
+          current = word;
+        } else if (curW + spaceW + wordW <= maxCols) {
+          current += ' ' + word;
         } else {
-          drops[i] += 0.9;
+          lines.push(current);
+          current = word;
+        }
+      }
+      if (current.length > 0) lines.push(current);
+      return lines;
+    }
+
+    // ── Build message mask ──
+    function buildMessageLayout() {
+      messageMask.fill(0);
+      revealedMask.fill(0);
+      messageCells = [];
+
+      const usableCols = cols - 4;
+      const lines = wrapMessage(usableCols);
+      const totalRows = lines.length * CHAR_HEIGHT + (lines.length - 1) * LINE_GAP;
+      const startRow = Math.max(0, Math.floor((rows - totalRows) / 2));
+
+      for (let li = 0; li < lines.length; li++) {
+        const line = lines[li];
+        const lineW = line.length * (CHAR_WIDTH + CHAR_GAP) - CHAR_GAP;
+        const startCol = Math.max(0, Math.floor((cols - lineW) / 2));
+        const rowOff = startRow + li * (CHAR_HEIGHT + LINE_GAP);
+
+        let col = startCol;
+        for (let ci = 0; ci < line.length; ci++) {
+          const glyph = FONT[line[ci]] || FONT[' '];
+          for (let gr = 0; gr < CHAR_HEIGHT; gr++) {
+            for (let gc = 0; gc < CHAR_WIDTH; gc++) {
+              const r = rowOff + gr;
+              const c = col + gc;
+              if (r >= 0 && r < rows && c >= 0 && c < cols && glyph[gr][gc] === '#') {
+                const i = idx(r, c);
+                messageMask[i] = 1;
+                messageCells.push(i);
+              }
+            }
+          }
+          col += CHAR_WIDTH + CHAR_GAP;
         }
       }
 
-      animationHandle = requestAnimationFrame(draw);
+      revealedCount = 0;
+      fullyRevealed = false;
+      revealAccum = 0;
     }
 
-    function startMatrix() {
-      if (animationHandle) {
-        cancelAnimationFrame(animationHandle);
-        animationHandle = null;
+    // ── Resize and reinitialize ──
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      canvas.width = vw * dpr;
+      canvas.height = vh * dpr;
+      canvas.style.width = vw + 'px';
+      canvas.style.height = vh + 'px';
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+
+      fontSize = Math.max(10, Math.min(14, Math.floor(vw / 100)));
+      cellW = fontSize * 0.62;
+      cellH = fontSize * 1.2;
+      cols = Math.floor(vw / cellW);
+      rows = Math.floor(vh / cellH);
+
+      const total = rows * cols;
+
+      cellChars = new Array(total);
+      cellTimers = new Float32Array(total);
+      cellAlpha = new Float32Array(total);
+      messageMask = new Uint8Array(total);
+      revealedMask = new Uint8Array(total);
+
+      // Fill with random characters, staggered timers, and varied brightness
+      for (let i = 0; i < total; i++) {
+        cellChars[i] = randChar();
+        cellTimers[i] = Math.random() * BG_MAX_MS;
+        cellAlpha[i] = randBgAlpha();
       }
+
+      buildMessageLayout();
 
       if (prefersReducedMotion.matches) {
-        ctx.clearRect(0, 0, width, height);
-        return;
+        revealedCount = messageCells.length;
+        fullyRevealed = true;
+        for (let j = 0; j < messageCells.length; j++) {
+          const ci = messageCells[j];
+          revealedMask[ci] = 1;
+          cellAlpha[ci] = randMsgAlpha();
+        }
+      }
+    }
+
+    // ── Main render loop ──
+    let lastTime = 0;
+
+    // Pre-build a small cache of rgba strings to avoid string allocation
+    // every frame. We quantize alpha to 2 decimal places (0.01 steps).
+    const alphaCache = {};
+    function rgbaStr(a) {
+      // Quantize to nearest 0.01
+      const key = (a * 100 + 0.5) | 0;
+      if (!alphaCache[key]) {
+        alphaCache[key] = 'rgba(0,255,65,' + (key / 100).toFixed(2) + ')';
+      }
+      return alphaCache[key];
+    }
+
+    function render(timestamp) {
+      const dt = lastTime === 0 ? 16 : Math.min(timestamp - lastTime, 100);
+      lastTime = timestamp;
+
+      const dpr = window.devicePixelRatio || 1;
+      const vw = canvas.width / dpr;
+      const vh = canvas.height / dpr;
+      const total = rows * cols;
+
+      // ── Update cell timers, swap characters, reassign brightness ──
+      for (let i = 0; i < total; i++) {
+        cellTimers[i] -= dt;
+        if (cellTimers[i] <= 0) {
+          cellChars[i] = randChar();
+          if (revealedMask[i] === 1) {
+            cellTimers[i] = randMsgTimer();
+            // Reassign message brightness on each change for subtle flicker
+            cellAlpha[i] = randMsgAlpha();
+          } else {
+            cellTimers[i] = randBgTimer();
+            // Reassign background brightness for organic spatial variation
+            cellAlpha[i] = randBgAlpha();
+          }
+        }
       }
 
-      animationHandle = requestAnimationFrame(draw);
+      // ── Progressive reveal ──
+      if (!fullyRevealed) {
+        revealAccum += dt;
+        while (revealAccum >= REVEAL_RATE && revealedCount < messageCells.length) {
+          revealAccum -= REVEAL_RATE;
+          const ci = messageCells[revealedCount];
+          revealedMask[ci] = 1;
+          cellTimers[ci] = randMsgTimer();
+          cellAlpha[ci] = randMsgAlpha();
+          revealedCount++;
+        }
+        if (revealedCount >= messageCells.length) {
+          fullyRevealed = true;
+        }
+      }
+
+      // ── Draw ──
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, vw, vh);
+      ctx.font = fontSize + "px 'Share Tech Mono','Courier New',monospace";
+      ctx.textBaseline = 'top';
+
+      // Draw all cells. Because each cell now has its own alpha, we must
+      // set fillStyle per-cell. We use the quantized cache to reduce
+      // string allocations.
+      for (let r = 0; r < rows; r++) {
+        const y = r * cellH;
+        const rOff = r * cols;
+        for (let c = 0; c < cols; c++) {
+          const i = rOff + c;
+          ctx.fillStyle = rgbaStr(cellAlpha[i]);
+          ctx.fillText(cellChars[i], c * cellW, y);
+        }
+      }
+
+      requestAnimationFrame(render);
     }
 
+    // ── Static render for reduced-motion ──
+    function renderStatic() {
+      const dpr = window.devicePixelRatio || 1;
+      const vw = canvas.width / dpr;
+      const vh = canvas.height / dpr;
+
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, vw, vh);
+      ctx.font = fontSize + "px 'Share Tech Mono','Courier New',monospace";
+      ctx.textBaseline = 'top';
+
+      for (let r = 0; r < rows; r++) {
+        const y = r * cellH;
+        const rOff = r * cols;
+        for (let c = 0; c < cols; c++) {
+          const i = rOff + c;
+          ctx.fillStyle = rgbaStr(cellAlpha[i]);
+          ctx.fillText(cellChars[i], c * cellW, y);
+        }
+      }
+    }
+
+    // ── Init ──
+    resize();
+
+    if (prefersReducedMotion.matches) {
+      renderStatic();
+    } else {
+      lastTime = 0;
+      requestAnimationFrame(render);
+    }
+
+    // ── Handle resize (debounced) ──
+    let resizeTimeout;
     window.addEventListener('resize', () => {
-      resizeCanvas();
-      startMatrix();
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        resize();
+        if (prefersReducedMotion.matches) {
+          renderStatic();
+        }
+      }, 150);
     });
-    if (typeof prefersReducedMotion.addEventListener === 'function') {
-      prefersReducedMotion.addEventListener('change', startMatrix);
-    } else if (typeof prefersReducedMotion.addListener === 'function') {
-      prefersReducedMotion.addListener(startMatrix);
-    }
 
-    resizeCanvas();
-    startMatrix();
+    // ── Handle reduced-motion preference changes ──
+    if (typeof prefersReducedMotion.addEventListener === 'function') {
+      prefersReducedMotion.addEventListener('change', () => {
+        resize();
+        if (prefersReducedMotion.matches) {
+          renderStatic();
+        } else {
+          lastTime = 0;
+          requestAnimationFrame(render);
+        }
+      });
+    } else if (typeof prefersReducedMotion.addListener === 'function') {
+      prefersReducedMotion.addListener(() => {
+        resize();
+        if (prefersReducedMotion.matches) {
+          renderStatic();
+        } else {
+          lastTime = 0;
+          requestAnimationFrame(render);
+        }
+      });
+    }
   </script>
 </body>
 </html>

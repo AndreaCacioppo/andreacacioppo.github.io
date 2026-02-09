@@ -7,11 +7,147 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #000; overflow: hidden; cursor: none; }
   canvas { display: block; }
+
+  .back-link {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(0, 5, 15, 0.7);
+    border: 1px solid rgba(30, 80, 120, 0.2);
+    color: rgba(40, 90, 130, 0.6);
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .back-link:hover,
+  .back-link:focus-visible {
+    color: rgba(60, 150, 200, 0.9);
+    border-color: rgba(40, 100, 160, 0.4);
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .back-link:hover svg {
+    filter: drop-shadow(0 0 6px rgba(60, 150, 200, 0.5));
+  }
+
+  .back-link:active {
+    transform: translateY(0);
+  }
+
+  .back-link svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: spin-star 12s linear infinite;
+    transition: filter 200ms ease;
+  }
+
+  @keyframes spin-star {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .forward-link {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(0, 5, 15, 0.7);
+    border: 1px solid rgba(30, 80, 120, 0.2);
+    color: rgba(40, 90, 130, 0.6);
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .forward-link:hover,
+  .forward-link:focus-visible {
+    color: rgba(60, 150, 200, 0.9);
+    border-color: rgba(40, 100, 160, 0.4);
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .forward-link:hover svg {
+    filter: drop-shadow(0 0 6px rgba(60, 150, 200, 0.5));
+  }
+
+  .forward-link:active {
+    transform: translateY(0);
+  }
+
+  .forward-link svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: filter 200ms ease;
+  }
+
+  @media (max-width: 600px) {
+    .back-link {
+      top: 1.2rem;
+      left: 1.2rem;
+    }
+    .forward-link {
+      top: 1.2rem;
+      right: 1.2rem;
+    }
+  }
 </style>
 </head>
 <body>
+<a class="back-link" href="/van.html" aria-label="return to starry night page">
+  <svg viewBox="0 0 24 24" stroke-width="1.6">
+    <circle cx="12" cy="12" r="3" stroke-width="1.6"/>
+    <circle cx="12" cy="12" r="6.5" stroke-width="0.9" stroke-dasharray="3.5 2.5" stroke-dashoffset="1"/>
+    <circle cx="12" cy="12" r="10" stroke-width="0.7" stroke-dasharray="4 3.5" stroke-dashoffset="3"/>
+    <path d="M12 1.5 C12.3 4, 11.7 4, 12 5" stroke-width="0.8"/>
+    <path d="M12 22.5 C11.7 20, 12.3 20, 12 19" stroke-width="0.8"/>
+    <path d="M1.5 12 C4 12.3, 4 11.7, 5 12" stroke-width="0.8"/>
+    <path d="M22.5 12 C20 11.7, 20 12.3, 19 12" stroke-width="0.8"/>
+    <path d="M4.2 4.2 C5.5 5.8, 6 5.3, 6.8 6.8" stroke-width="0.7"/>
+    <path d="M19.8 4.2 C18.5 5.8, 18 5.3, 17.2 6.8" stroke-width="0.7"/>
+    <path d="M4.2 19.8 C5.5 18.2, 6 18.7, 6.8 17.2" stroke-width="0.7"/>
+    <path d="M19.8 19.8 C18.5 18.2, 18 18.7, 17.2 17.2" stroke-width="0.7"/>
+  </svg>
+</a>
+<a class="forward-link" href="/topo.html" aria-label="topographic map">
+  <svg viewBox="0 0 24 24">
+    <ellipse cx="12" cy="12" rx="3" ry="2"/>
+    <ellipse cx="12" cy="12" rx="6" ry="4.5"/>
+    <ellipse cx="12" cy="12" rx="9.5" ry="7"/>
+  </svg>
+</a>
 <canvas id="c"></canvas>
 <script>
+// Realistic ocean-at-night ASCII simulation with bioluminescent mouse interaction.
+// Renders a top-down view of wind-driven swells, cross-chop, moderate foam,
+// gentle moonlight reflection, and interactive bioluminescence ripples.
+// Dark ocean with clearly visible wave texture; bioluminescence still dominates.
+// Wave frequencies tuned so the surface always feels alive -- no dead zones.
+
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 
@@ -30,8 +166,11 @@ let speed = 0;
 let time = 0;
 let frameCount = 0;
 
-// Thin characters ordered by visual weight (calm → active)
-const chars = [' ', '·', '.', ',', '\'', '-', '~', '˜', '~', '≈'];
+// Characters grouped by visual weight: calm water -> mid wave -> crest/foam
+// Even calm areas show faint texture -- only one space in the calm set
+const charsCalm  = [' ', '\u00B7', '\u00B7', '.', '.'];        // troughs: faint dots, one space
+const charsMid   = ['\u00B7', '-', '~', '\u2248', '\u223F'];   // mid-wave: visible ripple texture
+const charsCrest = ['~', '\u2248', '\u2591', '\u2591', '*'];    // crests: block chars for strongest peaks
 
 function resize() {
   W = canvas.width = window.innerWidth;
@@ -45,22 +184,59 @@ function resize() {
 }
 
 // --- Sea simulation ---
+// Produces broad directional swells with smaller cross-chop layered on top.
+// Frequencies are high enough that multiple wave ridges are always visible.
+// Returns a value roughly in -1..1 range.
 
 function seaHeight(x, y, t) {
   let h = 0;
-  // Deep swells — large, slow
-  h += Math.sin(x * 0.035 + t * 0.55) * 0.35;
-  h += Math.sin(y * 0.05 + t * 0.35 + 1.3) * 0.18;
-  // Cross-waves
-  h += Math.sin(x * 0.08 + y * 0.025 - t * 0.75) * 0.22;
-  h += Math.sin(x * 0.06 - y * 0.04 + t * 0.6 + 2.1) * 0.12;
-  // Surface ripples
-  h += Math.sin(x * 0.18 + t * 1.4) * 0.07;
-  h += Math.sin(y * 0.15 + t * 1.0 + x * 0.04) * 0.05;
-  // Fine detail
-  h += Math.sin(x * 0.28 + y * 0.2 - t * 0.4 + 4.0) * 0.03;
-  h += Math.sin(x * 0.13 + y * 0.31 + t * 0.9) * 0.03;
+
+  // Primary swell: rolling waves moving diagonally (NW to SE direction)
+  // Tighter spacing than before so ridges appear every ~35 cells instead of ~55
+  const swellAngle = 0.4;
+  const sx = x * Math.cos(swellAngle) + y * Math.sin(swellAngle);
+  h += Math.sin(sx * 0.03 + t * 0.4) * 0.38;
+  // Second harmonic for rounder wave shapes
+  h += Math.sin(sx * 0.06 + t * 0.8 + 0.8) * 0.13;
+
+  // Secondary swell: cross-swell at a different angle, also tighter
+  const swell2Angle = -0.6;
+  const sx2 = x * Math.cos(swell2Angle) + y * Math.sin(swell2Angle);
+  h += Math.sin(sx2 * 0.022 + t * 0.28 + 2.0) * 0.22;
+
+  // Wind chop: shorter, faster waves -- bumped up in frequency and amplitude
+  const chopAngle = 0.2;
+  const cx = x * Math.cos(chopAngle) + y * Math.sin(chopAngle);
+  h += Math.sin(cx * 0.10 + t * 1.2) * 0.13;
+  h += Math.sin(cx * 0.15 - t * 0.95 + 1.5) * 0.08;
+
+  // Cross-chop: perpendicular to wind, denser texture
+  const crossAngle = chopAngle + 1.3;
+  const ccx = x * Math.cos(crossAngle) + y * Math.sin(crossAngle);
+  h += Math.sin(ccx * 0.12 + t * 1.0 + 3.0) * 0.09;
+  h += Math.sin(ccx * 0.19 + t * 1.4 + 0.5) * 0.06;
+
+  // Fine surface ripples: high-frequency detail that fills gaps
+  h += Math.sin(x * 0.22 + y * 0.12 + t * 1.8) * 0.05;
+  h += Math.sin(x * 0.14 - y * 0.18 - t * 0.6 + 4.0) * 0.04;
+  h += Math.sin(x * 0.30 + y * 0.05 + t * 2.2 + 1.0) * 0.03;
+
   return h;
+}
+
+// Derivative of sea height for detecting crests (used for whitecap/foam)
+// Approximated by sampling nearby points
+function seaCrestiness(x, y, t) {
+  const h  = seaHeight(x, y, t);
+  const hx = seaHeight(x + 0.5, y, t);
+  const hy = seaHeight(x, y + 0.5, t);
+  // Curvature approximation: how "peaked" is this point?
+  const dx = hx - h;
+  const dy = hy - h;
+  // Also check if we're near the top of a wave (height above a threshold)
+  const peakness = Math.max(0, h - 0.15); // lowered from 0.25 so more peaks qualify
+  // Combine gradient magnitude with peak height
+  return peakness * 2.5 + Math.max(0, -dx - dy) * 0.8;
 }
 
 // Current field for advecting bioluminescence
@@ -72,21 +248,101 @@ function currentFieldY(x, y, t) {
   return Math.sin(x * 0.035 + t * 0.12) * 0.01 + Math.cos(y * 0.05 + t * 0.15) * 0.007;
 }
 
-function pickChar(height) {
-  // Map roughly -1..1 to character index
-  const norm = (height + 1) * 0.5; // 0..1
-  const i = Math.floor(norm * (chars.length - 0.01));
-  return chars[Math.max(0, Math.min(chars.length - 1, i))];
+// Pick character based on wave height and crestiness
+function pickChar(height, crest) {
+  // Normalize height from roughly -1..1 to 0..1
+  const norm = (height + 1) * 0.5;
+
+  // Lowered crest threshold so foam appears more readily
+  if (crest > 0.35) {
+    const ci = Math.min(charsCrest.length - 1, Math.floor((crest - 0.35) * 3.5));
+    return charsCrest[ci];
+  } else if (norm > 0.45) {
+    // Mid-wave threshold lowered from 0.55 so more surface shows texture
+    const ci = Math.floor((norm - 0.45) / 0.55 * (charsMid.length - 0.01));
+    return charsMid[Math.max(0, Math.min(charsMid.length - 1, ci))];
+  } else {
+    // Calm/trough: faint texture instead of empty
+    const ci = Math.floor(norm / 0.45 * (charsCalm.length - 0.01));
+    return charsCalm[Math.max(0, Math.min(charsCalm.length - 1, ci))];
+  }
 }
 
-// Base color for sea: dark navy, slightly varied
-function seaColor(height) {
-  // Darker in troughs, slightly lighter at crests
-  const norm = (height + 1) * 0.5;
-  const r = 14 + norm * 18 | 0;
-  const g = 28 + norm * 40 | 0;
-  const b = 70 + norm * 65 | 0;
+// Color for the sea: dark but clearly visible wave texture
+// Troughs are very dark, mid-tones are visible dark teal, crests have moderate pop
+function seaColor(height, crest, moonlight) {
+  const norm = (height + 1) * 0.5; // 0..1
+
+  let r, g, b;
+
+  if (crest > 0.35) {
+    // Foam/crests: moderate brightness, teal-white with some pop
+    const foamI = Math.min(1.0, (crest - 0.35) * 1.6);
+    r = 40 + foamI * 40 | 0;    // range ~40-80
+    g = 60 + foamI * 40 | 0;    // range ~60-100
+    b = 80 + foamI * 50 | 0;    // range ~80-130
+  } else if (norm > 0.45) {
+    // Mid-to-upper wave: clearly visible dark teal/navy
+    const t = (norm - 0.45) / 0.55;
+    r = 10 + t * 15  | 0;   // range ~10-25
+    g = 25 + t * 25  | 0;   // range ~25-50
+    b = 50 + t * 35  | 0;   // range ~50-85
+  } else {
+    // Deep troughs: very dark but not pure black
+    const t = norm / 0.45;
+    r = 3  + t * 5   | 0;   // range ~3-8
+    g = 8  + t * 10  | 0;   // range ~8-18
+    b = 20 + t * 20  | 0;   // range ~20-40
+  }
+
+  // Apply moonlight boost -- gentle shimmer, noticeable but not dominant
+  if (moonlight > 0) {
+    const ml = moonlight * 0.4;
+    r = Math.min(255, r + ml * 22 | 0);
+    g = Math.min(255, g + ml * 32 | 0);
+    b = Math.min(255, b + ml * 40 | 0);
+  }
+
   return [r, g, b];
+}
+
+// Moonlight reflection: a gentle shimmering band across the surface
+// Noticeable but not dominant -- a soft shimmer
+function moonlightIntensity(col, row, t) {
+  // Moon position shifts slowly over time for a living feel
+  const moonCol = cols * 0.55 + Math.sin(t * 0.03) * cols * 0.05;
+
+  // Vertical streak with some wave distortion
+  const distFromCenter = Math.abs(col - moonCol);
+  // The reflection narrows toward the "horizon" (top of screen) and widens near bottom
+  const rowFactor = 0.3 + (row / rows) * 0.7; // wider at bottom
+  const bandWidth = 4 + rowFactor * 8;
+
+  if (distFromCenter > bandWidth) return 0;
+
+  // Core brightness: Gaussian-ish falloff from center of band
+  const bandNorm = distFromCenter / bandWidth;
+  let intensity = Math.exp(-bandNorm * bandNorm * 3.0);
+
+  // Add shimmer: the reflection breaks up on the wave surface
+  const shimmer = Math.sin(col * 0.3 + row * 0.15 + t * 1.2) * 0.3
+                + Math.sin(col * 0.17 - row * 0.22 + t * 0.7) * 0.2
+                + Math.sin(col * 0.5 + t * 2.0 + row * 0.08) * 0.15;
+
+  // Reflection is stronger on wave crests (height-dependent)
+  const h = seaHeight(col, row, t);
+  const heightBoost = Math.max(0, (h + 1) * 0.5 - 0.3) * 1.2;
+
+  intensity *= (0.5 + shimmer * 0.5) * (0.6 + heightBoost * 0.4);
+
+  // Sparkle: occasional glints
+  const sparkle = Math.sin(col * 1.7 + row * 2.3 + t * 3.5);
+  if (sparkle > 0.93) {
+    intensity *= 1.5;
+  }
+
+  // Moderate final multiplier: visible shimmer without overpowering
+  return Math.max(0, Math.min(1, intensity * 0.45));
 }
 
 // --- Bioluminescence ---
@@ -238,7 +494,7 @@ function render() {
       const row = Math.floor(my / CHAR_H);
       addGlow(col, row, intensity * 0.7);
 
-      // Spawn ripple — throttle to avoid flooding
+      // Spawn ripple -- throttle to avoid flooding
       if (frameCount % 3 === 0 || speed > 15) {
         spawnRipple(col, row, intensity);
       }
@@ -262,15 +518,11 @@ function render() {
 
   const glow = useA ? glowA : glowB;
 
-  // Clear
+  // Clear to black
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
   ctx.font = FONT;
   ctx.textBaseline = 'top';
-
-  // Batch by quantized color for performance
-  // We'll render in a single pass, accepting per-char fillStyle changes
-  // but skipping empty/invisible cells
 
   for (let r = 0; r < rows; r++) {
     const py = r * CHAR_H;
@@ -280,11 +532,13 @@ function render() {
       if (px > W) break;
 
       const h = seaHeight(c, r, time);
-      const ch = pickChar(h);
-      if (ch === ' ') continue; // skip empty
+      const crest = seaCrestiness(c, r, time);
+      const moon = moonlightIntensity(c, r, time);
+      const ch = pickChar(h, crest);
+      if (ch === ' ') continue; // skip empty cells for performance
 
       const g = glow[r * cols + c];
-      const [br, bg, bb] = seaColor(h);
+      const [br, bg, bb] = seaColor(h, crest, moon);
 
       let red, green, blue;
       if (g > 0.005) {
@@ -294,7 +548,7 @@ function render() {
         const g3 = g2 * g2; // quadratic for more pop
 
         // Electric blue target: rgb(50, 210, 255) with white core
-        const glowR = 30 + g3 * 200;  // whites out at high intensity
+        const glowR = 30 + g3 * 200;
         const glowG = 190 + g3 * 65;
         const glowB = 255;
 

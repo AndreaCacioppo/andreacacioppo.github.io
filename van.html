@@ -68,15 +68,77 @@
     50%      { transform: translateY(-2px); }
   }
 
+  .back-link {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(8, 8, 22, 0.7);
+    border: 1px solid rgba(100, 160, 220, 0.15);
+    color: rgba(100, 160, 220, 0.65);
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .back-link:hover,
+  .back-link:focus-visible {
+    color: rgba(120, 200, 255, 0.95);
+    border-color: rgba(100, 160, 220, 0.4);
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .back-link:hover svg {
+    filter: drop-shadow(0 0 4px rgba(100, 180, 255, 0.5));
+  }
+
+  .back-link:active {
+    transform: translateY(0);
+  }
+
+  .back-link svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: filter 200ms ease;
+  }
+
   @media (max-width: 600px) {
     .bio-link {
       top: 1.2rem;
       right: 1.2rem;
     }
+    .back-link {
+      top: 1.2rem;
+      left: 1.2rem;
+    }
   }
 </style>
 </head>
 <body>
+<a class="back-link" href="/cat.html" aria-label="return to cat page">
+  <svg viewBox="0 0 24 24">
+    <path d="M3 11 L3 4 L7 8 L12 6 L17 8 L21 4 L21 11"/>
+    <ellipse cx="12" cy="15" rx="9" ry="7"/>
+    <circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="14" r="1" fill="currentColor" stroke="none"/>
+    <path d="M11 16.5 Q12 17.5 13 16.5" stroke-width="1.2"/>
+    <line x1="6" y1="15" x2="2" y2="14" stroke-width="1"/>
+    <line x1="6" y1="16" x2="2" y2="16.5" stroke-width="1"/>
+    <line x1="18" y1="15" x2="22" y2="14" stroke-width="1"/>
+    <line x1="18" y1="16" x2="22" y2="16.5" stroke-width="1"/>
+  </svg>
+</a>
 <a class="bio-link" href="/bio.html" aria-label="bioluminescent sea">
   <svg viewBox="0 0 24 24" stroke-width="1.6">
     <path d="M2 12 C4 9, 6 9, 8 12 S12 15, 14 12 S18 9, 20 12"/>

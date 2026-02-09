@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fractal</title>
+<style>
+  /* Dual-zoom crossfade Mandelbrot ASCII fractal */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* Navigation link - pill button with blur */
+  .nav-link {
+    position: fixed;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background: rgba(80, 60, 140, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(120, 100, 200, 0.3);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .nav-link:hover {
+    background: rgba(100, 80, 180, 0.4);
+    border-color: rgba(140, 120, 220, 0.5);
+    box-shadow: 0 0 16px rgba(120, 100, 220, 0.35);
+    transform: scale(1.08);
+  }
+
+  .nav-link svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: rgba(180, 160, 255, 0.8);
+    transition: stroke 0.3s ease;
+  }
+
+  .nav-link:hover svg {
+    stroke: rgba(210, 195, 255, 1);
+  }
+
+  .nav-back { top: 20px; left: 20px; }
+
+  @media (max-width: 600px) {
+    .nav-back { top: 14px; left: 14px; width: 38px; height: 38px; border-radius: 19px; }
+    .nav-back svg { width: 19px; height: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Back link to topo.html -->
+<a href="/topo.html" class="nav-link nav-back" aria-label="Back to topo">
+  <svg viewBox="0 0 24 24" stroke-width="1.4">
+    <ellipse cx="12" cy="12" rx="3" ry="2"/>
+    <ellipse cx="12" cy="12" rx="6" ry="4.5"/>
+    <ellipse cx="12" cy="12" rx="9.5" ry="7"/>
+  </svg>
+</a>
+
+<canvas id="fractalCanvas"></canvas>
+
+<script>
+// ------------------------------------------------------------------
+// Dual-Zoom Crossfade Mandelbrot ASCII Fractal
+//
+// Two independent Mandelbrot zoom "slots" (A and B) run in parallel.
+// When the active slot reaches a zoom depth threshold (exponent ~18),
+// the other slot starts fresh on a new target. A smooth crossfade
+// blends between them so there is NEVER a black screen or visible
+// transition seam. This creates a seamless infinite zoom loop.
+//
+// Rendering: standard Mandelbrot iteration with smooth iteration
+// count (escape radius method), mapped to ASCII chars and a cycling
+// 256-entry color palette.
+// ------------------------------------------------------------------
+
+const canvas = document.getElementById('fractalCanvas');
+const ctx = canvas.getContext('2d');
+
+// ---- Character density ramp ----
+const CHARS = ' .\u00B7:-=+*#%@';
+const CHAR_LEN = CHARS.length;
+
+// Merge characters: used where both fractals overlap during dissolve
+const MERGE_CHARS = ' \u00B7\u2234\u2248\u223F\u2726\u22B9\u25E6\u25C8\u25AA';
+const MERGE_LEN = MERGE_CHARS.length;
+
+// ---- Color palette: 256 entries ----
+// deep blue -> blue -> cyan -> green -> yellow -> orange -> magenta -> purple -> deep blue
+const PAL_SIZE = 256;
+const palR = new Float64Array(PAL_SIZE);
+const palG = new Float64Array(PAL_SIZE);
+const palB = new Float64Array(PAL_SIZE);
+
+(function buildPalette() {
+  const stops = [
+    [0.000,  10,  10,  80],
+    [0.125,  30,  50, 200],
+    [0.250,  20, 180, 220],
+    [0.375,  30, 200,  80],
+    [0.500, 240, 220,  40],
+    [0.625, 240, 140,  20],
+    [0.750, 220,  40, 180],
+    [0.875, 120,  20, 200],
+    [1.000,  10,  10,  80],
+  ];
+  for (let i = 0; i < PAL_SIZE; i++) {
+    const t = i / PAL_SIZE;
+    let s0 = stops[0], s1 = stops[1];
+    for (let j = 1; j < stops.length; j++) {
+      if (stops[j][0] >= t) { s1 = stops[j]; s0 = stops[j - 1]; break; }
+    }
+    const f = (t - s0[0]) / (s1[0] - s0[0] || 1);
+    // Smoothstep interpolation between color stops
+    const sf = f * f * (3 - 2 * f);
+    palR[i] = s0[1] + (s1[1] - s0[1]) * sf;
+    palG[i] = s0[2] + (s1[2] - s0[2]) * sf;
+    palB[i] = s0[3] + (s1[3] - s0[3]) * sf;
+  }
+})();
+
+// ---- Zoom parameters ----
+const ZOOM_SPEED = 0.25;             // exponent per second
+const MAX_ZOOM_EXPONENT = 8;         // hard safety limit
+const CROSSFADE_TRIGGER = 4;         // start dissolve here (image still vivid)
+const CROSSFADE_DURATION = 6;        // seconds for the per-cell dissolve
+const INITIAL_VIEW_RADIUS = 1.8;     // fractal-space half-extent at exponent 0
+const BASE_MAX_ITER = 200;           // base iteration count
+const ITER_PER_EXPONENT = 100;       // extra iterations per zoom exponent (deep zooms need many more)
+const MAX_ITER_CAP = 1500;           // hard cap on iterations
+const ESCAPE_RADIUS = 256;           // large escape radius for smooth coloring
+const LOG2 = Math.log(2);
+const LOG_ESCAPE = Math.log(ESCAPE_RADIUS);
+
+// ---- Interesting zoom targets on the Mandelbrot boundary ----
+const ZOOM_TARGETS = [
+  { re: -0.743643887037151, im:  0.131825904205330 },  // classic spiral
+  { re: -0.16,              im:  1.0405             },  // near top cusp
+  { re: -1.25066,           im:  0.02012            },  // mini-brot on antenna
+  { re:  0.001643721971153, im:  0.822467633298876  },  // seahorse valley
+  { re: -0.749,             im:  0.1                },  // cardioid boundary
+];
+
+// ---- Font / grid sizing ----
+const BASE_FONT = 14;
+let fontSize, charW, charH;
+let screenW, screenH;
+let cols, rows;
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fontSize = BASE_FONT;
+  ctx.font = fontSize + 'px Courier New, Courier, monospace';
+  charW = ctx.measureText('@').width;
+  charH = fontSize * 1.2;
+  screenW = window.innerWidth;
+  screenH = window.innerHeight;
+  cols = Math.ceil(screenW / charW) + 1;
+  rows = Math.ceil(screenH / charH) + 1;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ---- Color string cache to avoid repeated string construction ----
+const colorStrCache = new Map();
+function colorStr(r, g, b) {
+  // Quantize to multiples of 4 (reduces unique strings by ~64x)
+  r &= 0xfc; g &= 0xfc; b &= 0xfc;
+  const key = (r << 16) | (g << 8) | b;
+  let s = colorStrCache.get(key);
+  if (s === undefined) {
+    s = 'rgb(' + r + ',' + g + ',' + b + ')';
+    colorStrCache.set(key, s);
+    // Prune cache if it grows too large
+    if (colorStrCache.size > 4096) {
+      const it = colorStrCache.keys();
+      for (let i = 0; i < 1024; i++) colorStrCache.delete(it.next().value);
+    }
+  }
+  return s;
+}
+
+// ---- Zoom slot state ----
+// Each slot tracks its own zoom target, start time, and lifecycle.
+// States: "zooming" (actively zooming in), "fading-out" (crossfading away),
+//         "idle" (waiting to be assigned a new target)
+function createSlot(targetIndex, startTime) {
+  return {
+    target: ZOOM_TARGETS[targetIndex],
+    targetIndex: targetIndex,
+    startTime: startTime,     // when this slot started zooming
+    alpha: 1.0,               // current visibility (0..1)
+    state: 'zooming',         // 'zooming', 'fading-out', 'idle'
+  };
+}
+
+// Track which target index to use next (cycles through ZOOM_TARGETS)
+let nextTargetIndex = 1;
+
+// Initialize the two slots: A starts zooming, B is idle
+let slotA = createSlot(0, null); // startTime set on first frame
+let slotB = { target: null, targetIndex: -1, startTime: null, alpha: 0, state: 'idle' };
+
+// Crossfade state
+let crossfadeActive = false;
+let crossfadeStartTime = null;
+
+// ---- Compute the current zoom exponent for a slot ----
+function getExponent(slot, now) {
+  if (slot.state === 'idle' || slot.startTime === null) return 0;
+  return (now - slot.startTime) * ZOOM_SPEED;
+}
+
+// ---- Mandelbrot iteration with smooth coloring ----
+// Returns smooth iteration count, or -1 if the point is inside the set.
+function mandelbrot(cRe, cIm, maxIter) {
+  let zRe = 0, zIm = 0;
+  let zRe2 = 0, zIm2 = 0;
+  let i = 0;
+
+  // Main cardioid check (skip expensive iteration for most interior points)
+  const q = (cRe - 0.25) * (cRe - 0.25) + cIm * cIm;
+  if (q * (q + (cRe - 0.25)) <= 0.25 * cIm * cIm) return -1;
+  // Period-2 bulb check
+  if ((cRe + 1) * (cRe + 1) + cIm * cIm <= 0.0625) return -1;
+
+  const escSq = ESCAPE_RADIUS * ESCAPE_RADIUS;
+
+  while (i < maxIter) {
+    zIm = 2 * zRe * zIm + cIm;
+    zRe = zRe2 - zIm2 + cRe;
+    zRe2 = zRe * zRe;
+    zIm2 = zIm * zIm;
+    if (zRe2 + zIm2 > escSq) {
+      // Smooth iteration count using the escape radius method:
+      // subtract fractional part based on how far past escape we went
+      const log_zn = 0.5 * Math.log(zRe2 + zIm2);
+      const nu = Math.log(log_zn / LOG_ESCAPE) / LOG2;
+      return i + 1 - nu;
+    }
+    i++;
+  }
+  return -1; // inside the set
+}
+
+// ---- Spatial hash for per-cell dissolve during crossfade ----
+function cellHash(x, y) {
+  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+// ---- Precompute slot rendering parameters ----
+function getSlotParams(slot, now) {
+  const exponent = getExponent(slot, now);
+  const maxIter = Math.min(BASE_MAX_ITER + Math.floor(exponent) * ITER_PER_EXPONENT, MAX_ITER_CAP);
+  const viewRadius = INITIAL_VIEW_RADIUS * Math.pow(10, -exponent);
+  const aspect = (cols * charW) / (rows * charH);
+  return {
+    maxIter,
+    reMin: slot.target.re - viewRadius * aspect,
+    imMin: slot.target.im - viewRadius,
+    reStep: (2 * viewRadius * aspect) / cols,
+    imStep: (2 * viewRadius) / rows,
+    paletteOffset: now * 8,
+  };
+}
+
+// ---- Map smooth iteration to char + color (writes to module-level vars) ----
+let _r = 0, _g = 0, _b = 0, _ci = 0;
+function mapCell(smooth, paletteOffset) {
+  if (smooth < 0) {
+    _r = 4; _g = 4; _b = 8;
+    _ci = CHAR_LEN - 1;
+  } else {
+    const palT = (smooth + paletteOffset) % PAL_SIZE;
+    const palIdx = ((palT % PAL_SIZE) + PAL_SIZE) % PAL_SIZE;
+    const idx0 = Math.floor(palIdx) % PAL_SIZE;
+    const idx1 = (idx0 + 1) % PAL_SIZE;
+    const frac = palIdx - Math.floor(palIdx);
+    _r = (palR[idx0] + (palR[idx1] - palR[idx0]) * frac + 0.5) | 0;
+    _g = (palG[idx0] + (palG[idx1] - palG[idx0]) * frac + 0.5) | 0;
+    _b = (palB[idx0] + (palB[idx1] - palB[idx0]) * frac + 0.5) | 0;
+    const t = (smooth % (CHAR_LEN - 1)) / (CHAR_LEN - 1);
+    _ci = 1 + ((t * (CHAR_LEN - 1)) | 0);
+    if (_ci >= CHAR_LEN) _ci = CHAR_LEN - 1;
+    if (_ci < 1) _ci = 1;
+  }
+}
+
+// ---- Render a single slot (no dissolve active) ----
+function renderSlot(slot, now) {
+  if (slot.state === 'idle') return;
+  const p = getSlotParams(slot, now);
+  ctx.font = fontSize + 'px Courier New, Courier, monospace';
+  ctx.textBaseline = 'top';
+  let lastColor = '';
+  for (let row = 0; row < rows; row++) {
+    const cIm = p.imMin + row * p.imStep;
+    const sy = row * charH;
+    for (let col = 0; col < cols; col++) {
+      const smooth = mandelbrot(p.reMin + col * p.reStep, cIm, p.maxIter);
+      mapCell(smooth, p.paletteOffset);
+      if (_ci < 1) continue;
+      const c = colorStr(_r, _g, _b);
+      if (c !== lastColor) { ctx.fillStyle = c; lastColor = c; }
+      ctx.fillText(CHARS[_ci], col * charW, sy);
+    }
+  }
+}
+
+// ---- Organic dissolve: both fractals are "summed" during transition ----
+// For each cell, both Mandelbrot values are computed and blended:
+// - Colors mix proportionally based on crossfade weight
+// - Where both fractals have structure, special merge characters appear
+// - Brightness is additive in overlap zones, creating interference patterns
+function renderComposite(oldSlot, newSlot, now, progress) {
+  const op = getSlotParams(oldSlot, now);
+  const np = getSlotParams(newSlot, now);
+  const w = progress; // 0 = old only, 1 = new only
+  ctx.font = fontSize + 'px Courier New, Courier, monospace';
+  ctx.textBaseline = 'top';
+  let lastColor = '';
+
+  for (let row = 0; row < rows; row++) {
+    const oldCIm = op.imMin + row * op.imStep;
+    const newCIm = np.imMin + row * np.imStep;
+    const sy = row * charH;
+    for (let col = 0; col < cols; col++) {
+      const oldSmooth = mandelbrot(op.reMin + col * op.reStep, oldCIm, op.maxIter);
+      const newSmooth = mandelbrot(np.reMin + col * np.reStep, newCIm, np.maxIter);
+
+      const oldEsc = oldSmooth >= 0;
+      const newEsc = newSmooth >= 0;
+      if (!oldEsc && !newEsc) continue;
+
+      // Get color + brightness from each slot
+      let or_ = 4, og_ = 4, ob_ = 8, oldBr = 0;
+      let nr_ = 4, ng_ = 4, nb_ = 8, newBr = 0;
+
+      if (oldEsc) {
+        mapCell(oldSmooth, op.paletteOffset);
+        or_ = _r; og_ = _g; ob_ = _b;
+        oldBr = (_r * 0.299 + _g * 0.587 + _b * 0.114) / 255;
+      }
+      if (newEsc) {
+        mapCell(newSmooth, np.paletteOffset);
+        nr_ = _r; ng_ = _g; nb_ = _b;
+        newBr = (_r * 0.299 + _g * 0.587 + _b * 0.114) / 255;
+      }
+
+      // Weighted contributions
+      const oldA = (1 - w) * (oldEsc ? 1 : 0);
+      const newA = w * (newEsc ? 1 : 0);
+      const total = oldA + newA;
+      if (total < 0.01) continue;
+
+      // Blend colors proportionally
+      const r = ((or_ * oldA + nr_ * newA) / total) | 0;
+      const g = ((og_ * oldA + ng_ * newA) / total) | 0;
+      const b = ((ob_ * oldA + nb_ * newA) / total) | 0;
+
+      // Combined brightness with additive boost in overlap zones
+      const baseBr = oldBr * oldA + newBr * newA;
+      const overlap = (oldEsc && newEsc) ? 0.12 : 0;
+      const br = Math.min(1, baseBr + overlap);
+
+      // Where both fractals have structure: use merge characters
+      let ch;
+      if (oldEsc && newEsc) {
+        const ci = Math.min(Math.floor(br * (MERGE_LEN - 1)) + 1, MERGE_LEN - 1);
+        ch = MERGE_CHARS[ci];
+      } else {
+        const ci = Math.min(Math.floor(br * (CHAR_LEN - 1)) + 1, CHAR_LEN - 1);
+        ch = CHARS[ci];
+      }
+
+      const c = colorStr(r, g, b);
+      if (c !== lastColor) { ctx.fillStyle = c; lastColor = c; }
+      ctx.fillText(ch, col * charW, sy);
+    }
+  }
+}
+
+// ---- Main animation loop ----
+let globalStartTime = null;
+
+function render(timestamp) {
+  const now = timestamp / 1000;
+
+  if (globalStartTime === null) {
+    globalStartTime = now;
+    slotA.startTime = now;
+  }
+
+  const activeSlot = slotA.state === 'zooming' ? slotA : (slotB.state === 'zooming' ? slotB : null);
+  const idleSlot = slotA.state === 'idle' ? slotA : (slotB.state === 'idle' ? slotB : null);
+
+  // Trigger dissolve when the active slot reaches the threshold
+  if (!crossfadeActive && activeSlot) {
+    const exp = getExponent(activeSlot, now);
+    if (exp >= CROSSFADE_TRIGGER) {
+      crossfadeActive = true;
+      crossfadeStartTime = now;
+
+      if (idleSlot) {
+        idleSlot.target = ZOOM_TARGETS[nextTargetIndex];
+        idleSlot.targetIndex = nextTargetIndex;
+        idleSlot.startTime = now;
+        idleSlot.state = 'zooming';
+        nextTargetIndex = (nextTargetIndex + 1) % ZOOM_TARGETS.length;
+      }
+
+      activeSlot.state = 'fading-out';
+    }
+  }
+
+  // Track dissolve progress (smoothstepped 0→1)
+  let progress = 0;
+  if (crossfadeActive) {
+    const elapsed = now - crossfadeStartTime;
+    const t = Math.min(elapsed / CROSSFADE_DURATION, 1.0);
+    progress = t * t * (3 - 2 * t);
+
+    if (t >= 1.0) {
+      crossfadeActive = false;
+      crossfadeStartTime = null;
+      const fadingSlot = slotA.state === 'fading-out' ? slotA : slotB;
+      fadingSlot.state = 'idle';
+      fadingSlot.target = null;
+      fadingSlot.startTime = null;
+    }
+  }
+
+  // Clear
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, screenW, screenH);
+
+  // Render: per-cell dissolve during transition, single slot otherwise
+  if (crossfadeActive) {
+    const fadingSlot = slotA.state === 'fading-out' ? slotA : slotB;
+    const risingSlot = slotA.state === 'zooming' ? slotA : slotB;
+    renderComposite(fadingSlot, risingSlot, now, progress);
+  } else {
+    const slot = slotA.state === 'zooming' ? slotA : (slotB.state === 'zooming' ? slotB : null);
+    if (slot) renderSlot(slot, now);
+  }
+
+  requestAnimationFrame(render);
+}
+
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
