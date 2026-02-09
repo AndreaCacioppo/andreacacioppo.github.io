@@ -18,39 +18,14 @@
     font-family: 'Fira Code', monospace;
   }
   canvas { display: block; }
-  #loading {
-    position: fixed; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 12px;
-    font-family: 'Fira Code', monospace;
-    font-size: 14px;
-    color: rgba(100, 130, 200, 0.6);
-    letter-spacing: 4px;
-    z-index: 100;
-    background: #0a0a1a;
-    transition: opacity 1.5s ease-out;
-  }
-  #loading.hidden { opacity: 0; pointer-events: none; }
-  #title {
-    position: fixed; bottom: 18px; left: 0; right: 0;
-    text-align: center;
-    font-family: 'Fira Code', monospace;
-    font-size: 11px; letter-spacing: 6px;
-    text-transform: uppercase;
-    color: rgba(200, 190, 140, 0.25);
-    pointer-events: none; z-index: 10;
-  }
 </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
-<div id="loading">loading painting ···</div>
-<div id="title">De Sterrennacht — Vincent van Gogh, 1889</div>
 
 <script>
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const loadingEl = document.getElementById('loading');
 
 const TIERS = [
   [' '],
@@ -207,11 +182,8 @@ function loadImg() {
     cachedImg = img;
     resize();
     coarseGrain(img);
-    loadingEl.classList.add('hidden');
-    setTimeout(() => loadingEl.style.display = 'none', 1600);
   };
   img.onerror = () => {
-    loadingEl.textContent = 'image load failed — check CORS or network';
   };
   img.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg';
 }

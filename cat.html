@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>cat</title>
+<title>Cat</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -17,7 +17,7 @@
   }
   #cat {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.2;
     color: #4a9e4a;
     white-space: pre;
@@ -59,11 +59,10 @@
   }
 
   .van-link svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
     animation: spin-star 12s linear infinite;
@@ -85,7 +84,21 @@
 <body>
 <a class="van-link" href="/van.html" aria-label="starry night">
   <svg viewBox="0 0 24 24">
-    <polygon points="12,2 14.5,8.5 21.5,9 16,13.8 17.8,21 12,17 6.2,21 8,13.8 2.5,9 9.5,8.5"/>
+    <!-- inner glow -->
+    <circle cx="12" cy="12" r="3" stroke-width="1.6"/>
+    <!-- swirl halo ring -->
+    <circle cx="12" cy="12" r="6.5" stroke-width="0.9" stroke-dasharray="3.5 2.5" stroke-dashoffset="1"/>
+    <!-- outer swirl ring -->
+    <circle cx="12" cy="12" r="10" stroke-width="0.7" stroke-dasharray="4 3.5" stroke-dashoffset="3"/>
+    <!-- radiating brush wisps -->
+    <path d="M12 1.5 C12.3 4, 11.7 4, 12 5" stroke-width="0.8"/>
+    <path d="M12 22.5 C11.7 20, 12.3 20, 12 19" stroke-width="0.8"/>
+    <path d="M1.5 12 C4 12.3, 4 11.7, 5 12" stroke-width="0.8"/>
+    <path d="M22.5 12 C20 11.7, 20 12.3, 19 12" stroke-width="0.8"/>
+    <path d="M4.2 4.2 C5.5 5.8, 6 5.3, 6.8 6.8" stroke-width="0.7"/>
+    <path d="M19.8 4.2 C18.5 5.8, 18 5.3, 17.2 6.8" stroke-width="0.7"/>
+    <path d="M4.2 19.8 C5.5 18.2, 6 18.7, 6.8 17.2" stroke-width="0.7"/>
+    <path d="M19.8 19.8 C18.5 18.2, 18 18.7, 17.2 17.2" stroke-width="0.7"/>
   </svg>
 </a>
 <pre id="cat"></pre>
@@ -98,10 +111,13 @@ let blinking = false;
 
 // ─── Smooth gaze ───
 let currentGX = 0, currentGY = 0;
-const LERP = 0.07;
+const LERP = 0.06;
 
 // ─── Eye parameters ───
-const EYE_W = 26, EYE_H = 9, RX = 12, RY = 4.0;
+const EYE_W = 30, EYE_H = 10, RX = 14, RY = 4.5;
+const GAP = '      ';
+const TOTAL_W = EYE_W + GAP.length + EYE_W; // 66
+const CENTER = TOTAL_W / 2; // 33
 
 const TIER = [
   ['%','%','%','%','%','%','%'],
@@ -110,7 +126,7 @@ const TIER = [
   ['=','+','~','X','0','=','+'],
   ['~','~','+','=','~','0','~'],
 ];
-const BORDER_CHARS = ['·','0','=','·','X','·','0'];
+const BORDER = ['·','0','=','·','X','·','0'];
 
 function charAt(pool, r, c) {
   return pool[((r * 37 + c * 13 + 7) & 0x7FFFFFFF) % pool.length];
@@ -118,7 +134,7 @@ function charAt(pool, r, c) {
 
 function buildEye(gazeX, gazeY) {
   const cx = EYE_W / 2, cy = EYE_H / 2;
-  const fx = cx + gazeX * 4, fy = cy + gazeY * 1.2;
+  const fx = cx + gazeX * 3.5, fy = cy + gazeY * 1.0;
   const slitX = fx, slitCY = cy + gazeY * 1.8;
   const grid = [];
   for (let r = 0; r < EYE_H; r++) {
@@ -127,8 +143,7 @@ function buildEye(gazeX, gazeY) {
       const ex = (c - cx) / RX, ey = (r - cy) / RY;
       const eDist = ex * ex + ey * ey;
       if (eDist > 1.15) { row += ' '; continue; }
-      if (eDist > 0.88) { row += charAt(BORDER_CHARS, r, c); continue; }
-      // Slit pupil
+      if (eDist > 0.88) { row += charAt(BORDER, r, c); continue; }
       const slitRowDist = Math.abs(r - slitCY);
       const slitHalfH = 2.8;
       if (slitRowDist < slitHalfH) {
@@ -168,6 +183,11 @@ function buildBlinkEye() {
   return grid;
 }
 
+function centerLine(text) {
+  const pad = Math.max(0, Math.floor(CENTER - text.length / 2));
+  return ' '.repeat(pad) + text;
+}
+
 function getTargetGaze() {
   const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
   const dx = mouseX - cx, dy = mouseY - cy;
@@ -193,68 +213,32 @@ function colorize(line) {
         out += `<span style="color:#3d8b3d">${ch}</span>`; break;
       case '+': case ';':
         out += `<span style="color:#398039">${ch}</span>`; break;
-      case '-': case '─': case '╱': case '╲':
+      case '-': case '─':
         out += `<span style="color:#2d602d">${ch}</span>`; break;
       case '|': case '¦': case '│':
         out += `<span style="color:#1a3518">${ch}</span>`; break;
-      case '/': case '\\':
-        out += `<span style="color:#3a7a3a">${ch}</span>`; break;
       default: out += ch;
     }
   }
   return out;
 }
 
-// ─── Face layout constants ───
-const GAP = '    ';
-const FACE_W = EYE_W + GAP.length + EYE_W; // total width of eye row
-const MID = Math.floor(FACE_W / 2);
-
-function pad(text, totalW) {
-  const padL = Math.max(0, Math.floor((totalW - text.length) / 2));
-  return ' '.repeat(padL) + text;
-}
-
 function render() {
   const le = blinking ? buildBlinkEye() : buildEye(currentGX, currentGY);
   const re = blinking ? buildBlinkEye() : buildEye(currentGX, currentGY);
-
   const lines = [];
-
-  // ── Ears ──
-  lines.push(pad('·                                          ·', FACE_W));
-  lines.push(pad('/\\                                        /\\', FACE_W));
-  lines.push(pad('/%%\\                                      /%%\\', FACE_W));
-  lines.push(pad('/%%%%\\            ··~~~~~~~~··            /%%%%\\', FACE_W));
-  lines.push(pad('/%%X%%=\\        ·~=%%%%%%%%%%=~·        /=%%X%%\\', FACE_W));
-  lines.push(pad('/%%X=+~~\\     ·~=%%%%%%%%%%%%%%%=~·     /~~+=X%%\\', FACE_W));
-  lines.push(pad('~~+~·   \\   ·~=%%%%%%%%%%%%%%%%%%%=~·   /   ·~+~~', FACE_W));
-  lines.push(pad('·     ·=%%%%%%%%%%%%%%%%%%%%%%%%%%%=·     ·', FACE_W));
-
-  // ── Eyes ──
   for (let r = 0; r < EYE_H; r++) {
-    const row = '  ' + le[r].padEnd(EYE_W) + GAP + re[r] + '  ';
-    lines.push(pad(row, FACE_W));
+    const row = le[r].padEnd(EYE_W) + GAP + re[r];
+    lines.push(row.padEnd(TOTAL_W));
   }
-
-  // ── Cheeks & nose bridge ──
-  lines.push(pad('·=%%+~·      ·~~~~··~~~~·      ·~+%%=·', FACE_W));
-  lines.push(pad('·~=+·       ·~~~~·~~~~·       ·+=~·', FACE_W));
-
-  // ── Nose ──
-  lines.push(pad('=%%%%x', FACE_W));
-  lines.push(pad('=%%;~', FACE_W));
-
-  // ── Mouth & whiskers ──
-  lines.push(pad('~~%%x~~····=%;=X=;%=····~~x%%~~', FACE_W));
-  lines.push(pad('~XX==X~~·          ·~~X==XX~', FACE_W));
-  lines.push(pad('·~~~·              ·~~~·', FACE_W));
-
-  // ── Chin ──
-  lines.push(pad('·~=%%%%%%%%%%=~·', FACE_W));
-  lines.push(pad('··~~======~~··', FACE_W));
-  lines.push(pad('··········', FACE_W));
-
+  lines.push('');
+  lines.push(centerLine('·~~~~·  ·~~~~·').padEnd(TOTAL_W));
+  lines.push(centerLine('·~~~~·~~~~·').padEnd(TOTAL_W));
+  lines.push(centerLine('=%%%%x').padEnd(TOTAL_W));
+  lines.push(centerLine('=%%;~').padEnd(TOTAL_W));
+  lines.push(centerLine('~~%%x~~····=%;=X=;%=····~~x%%~~').padEnd(TOTAL_W));
+  lines.push(centerLine('~XX==X~~·          ·~~X==XX~').padEnd(TOTAL_W));
+  lines.push(centerLine('·~~~·              ·~~~·').padEnd(TOTAL_W));
   catEl.innerHTML = lines.map(colorize).join('\n');
 }
 
