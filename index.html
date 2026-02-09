@@ -59,30 +59,59 @@
       top: 1.5rem;
       right: 1.5rem;
       z-index: 1000;
-      padding: 0.6rem 1.25rem;
-      background: linear-gradient(135deg, rgba(185, 32, 32, 0.95), rgba(255, 94, 58, 0.8));
-      color: #fff;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      border-radius: 999px;
-      box-shadow: 0 12px 30px rgba(210, 40, 40, 0.25);
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease, opacity 200ms ease;
+      width: 42px;
+      height: 18px;
+      padding: 0;
+      border-radius: 9px;
+      background: linear-gradient(180deg, #e63232 0%, #c41e1e 40%, #a01818 100%);
+      box-shadow:
+        0 8px 24px rgba(200, 30, 30, 0.3),
+        inset 0 2px 3px rgba(255, 150, 150, 0.35),
+        inset 0 -1px 2px rgba(80, 0, 0, 0.3);
+      overflow: hidden;
+      transition: transform 200ms ease, box-shadow 200ms ease, opacity 200ms ease;
       will-change: transform, opacity;
+      display: block;
+      font-size: 0;
+      color: transparent;
+    }
+
+    .hard-truths-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1.5px;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.18);
+      transform: translateX(-50%);
+    }
+
+    .hard-truths-link::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 6px;
+      width: 14px;
+      height: 5px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
     }
 
     .hard-truths-link:hover,
     .hard-truths-link:focus-visible {
-      background: linear-gradient(135deg, rgba(220, 30, 30, 1), rgba(255, 120, 85, 0.95));
-      box-shadow: 0 16px 40px rgba(220, 50, 50, 0.35);
-      transform: translateY(-2px) scale(1.02);
+      background: linear-gradient(180deg, #f03838 0%, #d42222 40%, #b01c1c 100%);
+      box-shadow:
+        0 12px 32px rgba(220, 40, 40, 0.4),
+        inset 0 2px 3px rgba(255, 170, 170, 0.4),
+        inset 0 -1px 2px rgba(80, 0, 0, 0.3);
+      transform: translateY(-2px) scale(1.05);
       text-decoration: none;
       outline: none;
     }
 
     .hard-truths-link:active {
-      transform: translateY(0) scale(0.98);
+      transform: translateY(0) scale(0.97);
     }
 
     .hard-truths-link.is-hidden {
@@ -213,18 +242,17 @@
     @media (max-width: 600px) {
       .hard-truths-link {
         top: auto;
-        right: 1rem;
+        right: auto;
         bottom: 1.25rem;
-        left: 1rem;
-        padding: 0.75rem 1.5rem;
-        text-align: center;
-        font-size: 0.82rem;
-        letter-spacing: 0.08em;
-        box-shadow: 0 16px 30px rgba(220, 50, 50, 0.32);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 52px;
+        height: 22px;
+        border-radius: 11px;
       }
 
       .hard-truths-link.is-hidden {
-        transform: translateY(12px) scale(0.96);
+        transform: translateX(-50%) translateY(12px) scale(0.96);
         box-shadow: 0 8px 24px rgba(200, 35, 35, 0.26);
       }
     }
@@ -328,7 +356,7 @@
   </script>
 </head>
 <body>
-<a aria-label="open the red pill experience" class="hard-truths-link" href="/hard-truths.html">red pill</a>
+<a aria-label="open the red pill experience" class="hard-truths-link" href="/hard-truths.html"></a>
 <main>
 <header class="cv-header">
 <img alt="Profile picture" class="profile-pic" src="images/foto_profilo.jpeg"/>
@@ -443,9 +471,9 @@
 </section>
 <section id="talks">
 <h2>Talks</h2>
-<article><h3>Feb 2026</h3><p><b>Quantum Computing @ INFN</b> @ Milan, Italy, Talk</p><p>"Quantum enhanced fraud detection: a comparative study on real-world banking data"</p></article><article>
+<article><h3>Feb 2026</h3><p><b>Quantum Computing @ INFN</b>, Milan, Italy, Talk</p><p>"Quantum enhanced fraud detection: a comparative study on real-world banking data"</p></article><article>
 <h3>Oct 2024</h3>
-<p><b>Quantum Computing</b> @ INFN, Padova, Italy, Talk</p>
+<p><b>Quantum Computing @ INFN</b>, Padova, Italy, Talk</p>
 <p>"Quantum diffusion models for quantum data learning"</p>
 </article>
 <article>
