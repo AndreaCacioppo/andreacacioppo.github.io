@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII Cat</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1210;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  #cat {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.2;
+    color: #4a9e4a;
+    white-space: pre;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<pre id="cat"></pre>
+
+<script>
+const catEl = document.getElementById('cat');
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+let blinking = false;
+
+// ─── Smooth gaze ───
+let currentGX = 0, currentGY = 0;
+const LERP = 0.06;
+
+// ─── Eye parameters ───
+const EYE_W = 30, EYE_H = 10, RX = 14, RY = 4.5;
+const GAP = '      ';
+const TOTAL_W = EYE_W + GAP.length + EYE_W; // 66
+const CENTER = TOTAL_W / 2; // 33
+
+const TIER = [
+  ['%','%','%','%','%','%','%'],
+  ['%','%','X','%','=','%','0'],
+  ['%','=','X','+','0','%','='],
+  ['=','+','~','X','0','=','+'],
+  ['~','~','+','=','~','0','~'],
+];
+const BORDER = ['·','0','=','·','X','·','0'];
+
+function charAt(pool, r, c) {
+  return pool[((r * 37 + c * 13 + 7) & 0x7FFFFFFF) % pool.length];
+}
+
+function buildEye(gazeX, gazeY) {
+  const cx = EYE_W / 2, cy = EYE_H / 2;
+  const fx = cx + gazeX * 3.5, fy = cy + gazeY * 1.0;
+  const slitX = fx, slitCY = cy + gazeY * 1.8;
+  const grid = [];
+  for (let r = 0; r < EYE_H; r++) {
+    let row = '';
+    for (let c = 0; c < EYE_W; c++) {
+      const ex = (c - cx) / RX, ey = (r - cy) / RY;
+      const eDist = ex * ex + ey * ey;
+      if (eDist > 1.15) { row += ' '; continue; }
+      if (eDist > 0.88) { row += charAt(BORDER, r, c); continue; }
+      const slitRowDist = Math.abs(r - slitCY);
+      const slitHalfH = 2.8;
+      if (slitRowDist < slitHalfH) {
+        const slitNorm = slitRowDist / slitHalfH;
+        const slitHalfW = 1.2 * (1.0 - slitNorm * 0.85);
+        const distToSlit = Math.abs(c - slitX);
+        if (distToSlit < slitHalfW) { row += ' '; continue; }
+        if (distToSlit < slitHalfW + 0.8) {
+          row += ['|','¦','│'][(r * 7 + c * 3) % 3]; continue;
+        }
+      }
+      const dx = c - fx, dy = (r - fy) * 2.2;
+      const fDist = Math.sqrt(dx * dx + dy * dy);
+      const tier = fDist < 3 ? 0 : fDist < 5.5 ? 1 : fDist < 8 ? 2 : fDist < 11 ? 3 : 4;
+      row += charAt(TIER[tier], r, c);
+    }
+    grid.push(row);
+  }
+  return grid;
+}
+
+function buildBlinkEye() {
+  const cx = EYE_W / 2, cy = EYE_H / 2;
+  const grid = [];
+  for (let r = 0; r < EYE_H; r++) {
+    let row = '';
+    for (let c = 0; c < EYE_W; c++) {
+      const ex = (c - cx) / RX, ey = (r - cy) / RY;
+      const eDist = ex * ex + ey * ey;
+      if (eDist > 1.15) { row += ' '; continue; }
+      if (r >= Math.floor(cy) - 0.5 && r <= Math.ceil(cy) + 0.5) {
+        row += eDist < 1.0 ? ['=','~','─','=','~'][(c * 11 + 3) % 5] : '·';
+      } else { row += ' '; }
+    }
+    grid.push(row);
+  }
+  return grid;
+}
+
+function centerLine(text) {
+  const pad = Math.max(0, Math.floor(CENTER - text.length / 2));
+  return ' '.repeat(pad) + text;
+}
+
+function getTargetGaze() {
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  const dx = mouseX - cx, dy = mouseY - cy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist < 30) return { gx: 0, gy: 0 };
+  const t = Math.min(dist / 400, 1);
+  return {
+    gx: (dx / (Math.abs(dx) || 1)) * t,
+    gy: (dy / (Math.abs(dy) || 1)) * t * 0.5,
+  };
+}
+
+function colorize(line) {
+  let out = '';
+  for (const ch of line) {
+    switch (ch) {
+      case '·': out += `<span style="color:#254a25">${ch}</span>`; break;
+      case '%': out += `<span style="color:#5cb85c">${ch}</span>`; break;
+      case '~': out += `<span style="color:#3d8b3d">${ch}</span>`; break;
+      case '=': case 'X': case 'x':
+        out += `<span style="color:#4aa04a">${ch}</span>`; break;
+      case '0': case 'O':
+        out += `<span style="color:#3d8b3d">${ch}</span>`; break;
+      case '+': case ';':
+        out += `<span style="color:#398039">${ch}</span>`; break;
+      case '-': case '─':
+        out += `<span style="color:#2d602d">${ch}</span>`; break;
+      case '|': case '¦': case '│':
+        out += `<span style="color:#1a3518">${ch}</span>`; break;
+      default: out += ch;
+    }
+  }
+  return out;
+}
+
+function render() {
+  const le = blinking ? buildBlinkEye() : buildEye(currentGX, currentGY);
+  const re = blinking ? buildBlinkEye() : buildEye(currentGX, currentGY);
+  const lines = [];
+  for (let r = 0; r < EYE_H; r++) {
+    const row = le[r].padEnd(EYE_W) + GAP + re[r];
+    lines.push(row.padEnd(TOTAL_W));
+  }
+  lines.push('');
+  lines.push(centerLine('·~~~~·  ·~~~~·').padEnd(TOTAL_W));
+  lines.push(centerLine('·~~~~·~~~~·').padEnd(TOTAL_W));
+  lines.push(centerLine('=%%%%x').padEnd(TOTAL_W));
+  lines.push(centerLine('=%%;~').padEnd(TOTAL_W));
+  lines.push(centerLine('~~%%x~~····=%;=X=;%=····~~x%%~~').padEnd(TOTAL_W));
+  lines.push(centerLine('~XX==X~~·          ·~~X==XX~').padEnd(TOTAL_W));
+  lines.push(centerLine('·~~~·              ·~~~·').padEnd(TOTAL_W));
+  catEl.innerHTML = lines.map(colorize).join('\n');
+}
+
+function tick() {
+  const t = getTargetGaze();
+  currentGX += (t.gx - currentGX) * LERP;
+  currentGY += (t.gy - currentGY) * LERP;
+  render();
+  requestAnimationFrame(tick);
+}
+
+function scheduleBlink() {
+  setTimeout(() => {
+    blinking = true;
+    setTimeout(() => { blinking = false; scheduleBlink(); }, 130);
+  }, 2500 + Math.random() * 4000);
+}
+
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+requestAnimationFrame(tick);
+scheduleBlink();
+</script>
+</body>
+</html>
