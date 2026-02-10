@@ -61,10 +61,13 @@
   }
 
   .nav-back { top: 20px; left: 20px; }
+  .nav-forward { top: 20px; right: 20px; }
 
   @media (max-width: 600px) {
     .nav-back { top: 14px; left: 14px; width: 38px; height: 38px; border-radius: 19px; }
     .nav-back svg { width: 19px; height: 19px; }
+    .nav-forward { top: 14px; right: 14px; width: 38px; height: 38px; border-radius: 19px; }
+    .nav-forward svg { width: 19px; height: 19px; }
   }
 </style>
 </head>
@@ -76,6 +79,18 @@
     <ellipse cx="12" cy="12" rx="3" ry="2"/>
     <ellipse cx="12" cy="12" rx="6" ry="4.5"/>
     <ellipse cx="12" cy="12" rx="9.5" ry="7"/>
+  </svg>
+</a>
+
+<a href="/tree.html" class="nav-link nav-forward" aria-label="Forward to tree garden">
+  <svg viewBox="0 0 24 24" stroke-width="1.4">
+    <line x1="12" y1="22" x2="12" y2="8"/>
+    <path d="M12 15 L7 10"/>
+    <path d="M12 15 L17 10"/>
+    <path d="M12 10 L9 5"/>
+    <path d="M12 10 L15 5"/>
+    <path d="M7 10 L4 5"/>
+    <path d="M17 10 L20 5"/>
   </svg>
 </a>
 

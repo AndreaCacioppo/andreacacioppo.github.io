@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tree</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080a06; overflow: hidden; }
+  canvas { display: block; }
+
+  .nav-link {
+    position: fixed;
+    top: 2rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(8, 12, 6, 0.75);
+    border: 1px solid rgba(60, 90, 40, 0.25);
+    color: rgba(70, 110, 50, 0.65);
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-link:hover,
+  .nav-link:focus-visible {
+    color: rgba(100, 160, 60, 0.9);
+    border-color: rgba(70, 120, 40, 0.45);
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .nav-link:hover svg {
+    filter: drop-shadow(0 0 6px rgba(80, 140, 50, 0.5));
+  }
+
+  .nav-link:active {
+    transform: translateY(0);
+  }
+
+  .nav-link svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: filter 200ms ease;
+  }
+
+  .nav-back { left: 2rem; }
+
+  @media (max-width: 600px) {
+    .nav-link { top: 1.2rem; }
+    .nav-back { left: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+<a class="nav-link nav-back" href="/fractal.html" aria-label="back to fractal">
+  <svg viewBox="0 0 24 24" stroke-width="1.5">
+    <path d="M12 12 C12 9, 15 9, 15 12 C15 16, 8 16, 8 12 C8 7, 17 7, 17 12 C17 18, 6 18, 6 12 C6 5, 19 5, 19 12"/>
+  </svg>
+</a>
+<canvas id="c"></canvas>
+<script>
+// Organic ASCII forest.
+// Trees grow from the ground with thick trunks, recursive branching,
+// dense canopies, and natural curves. Trees scale to screen height —
+// some reach nearly the top. Old trees slowly fade, new ones keep growing.
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+let FONT_SIZE = 13;
+let CHAR_W = 10;
+let CHAR_H = 16;
+let FONT = FONT_SIZE + 'px "Courier New", monospace';
+let W, H, cols, rows;
+
+// Forest floor (rebuilt on resize) — 3 rows of ground detail
+const GROUND_ROWS = 3;
+let ground = null;
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  FONT_SIZE = Math.max(8, Math.min(14, Math.round(W / 85)));
+  CHAR_W = Math.round(FONT_SIZE * 0.65);
+  CHAR_H = Math.round(FONT_SIZE * 1.22);
+  FONT = FONT_SIZE + 'px "Courier New", monospace';
+  cols = Math.ceil(W / CHAR_W) + 1;
+  rows = Math.ceil(H / CHAR_H) + 1;
+  buildGround();
+}
+
+// --- Deterministic hash for stable patterns ---
+function cellHash(x, y) {
+  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+function buildGround() {
+  // Three rows: grass (top), moss/litter (mid), soil (bottom)
+  const grassCh = ['.', ',', ';', '`', "'", '"', '.', ',', ';', ':'];
+  const mossCh  = ['.', ',', '\u00B7', ':', ';', '.', ',', '\u00B7'];
+  const soilCh  = ['.', ',', '.', '\u00B7', '.', ','];
+
+  ground = [[], [], []];
+  for (let c = 0; c < cols; c++) {
+    const h1 = cellHash(c, 10001);
+    const h2 = cellHash(c, 10002);
+    const h3 = cellHash(c, 10003);
+    ground[0].push({
+      ch: grassCh[Math.floor(h1 * grassCh.length)],
+      r: 28 + Math.floor(h1 * 25), g: 48 + Math.floor(h1 * 40), b: 16 + Math.floor(h1 * 12)
+    });
+    ground[1].push({
+      ch: mossCh[Math.floor(h2 * mossCh.length)],
+      r: 32 + Math.floor(h2 * 20), g: 40 + Math.floor(h2 * 30), b: 18 + Math.floor(h2 * 10)
+    });
+    ground[2].push({
+      ch: soilCh[Math.floor(h3 * soilCh.length)],
+      r: 35 + Math.floor(h3 * 18), g: 25 + Math.floor(h3 * 18), b: 14 + Math.floor(h3 * 10)
+    });
+  }
+}
+
+// --- Seeded PRNG (Park-Miller) ---
+function createRng(seed) {
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return function () {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+// --- Plant constants ---
+const MAX_DEPTH   = 7;       // deep recursion for complex branching
+const SEG_TIME    = 0.18;    // seconds per segment — slow enough to watch growth
+const GROW_IN_DUR = 0.5;     // seconds for a segment to fully materialise
+const TIP_GLOW_DUR = 0.6;    // bright glow fades over this duration at growing tips
+const MAX_AGE     = 50;      // seconds before fade begins
+const FADE_DUR    = 12;      // seconds to fully fade out
+const SPAWN_MIN   = 3.0;
+const SPAWN_MAX   = 6.0;
+const MAX_PLANTS  = 16;
+const MIN_SPACING = 3;       // allow close trees for forest density
+const MAX_SEGS    = 1500;    // segment cap per tree
+
+// Bark characters (shared across species — structural)
+const BARK_CH  = ['\u2502', '\u2502', '\u2503', '|'];
+const BARK_FILL = ['\u2551', '\u2503', '\u2502'];
+
+// Species definitions: shape, colors, and leaf characters
+const SPECIES = [
+  { // Oak — wide spreading canopy, warm green, thick trunk
+    w: 3,
+    angle: [0.40, 0.50], shrink: [0.50, 0.20], firstBranch: [0.25, 0.20],
+    leafCh: ['*', '\u2663', '@', '#', '&', '%'],
+    bark: { r: [90, 25], g: [50, 20], b: [20, 15] },
+    leaf: { r: [20, 40], g: [80, 100], b: [10, 30] },
+    branchBlend: 65,
+  },
+  { // Pine — tall narrow, dark green, short horizontal branches
+    w: 2,
+    angle: [0.55, 0.30], shrink: [0.28, 0.15], firstBranch: [0.10, 0.15],
+    leafCh: ['*', '^', '\u2660', '*', '^'],
+    bark: { r: [70, 20], g: [42, 15], b: [22, 12] },
+    leaf: { r: [8, 20], g: [45, 65], b: [12, 22] },
+    branchBlend: 35,
+  },
+  { // Birch — slender, light bark, delicate yellow-green leaves
+    w: 2,
+    angle: [0.25, 0.30], shrink: [0.50, 0.22], firstBranch: [0.35, 0.20],
+    leafCh: ['*', '\u00B7', 'o', ',', "'", '*'],
+    bark: { r: [160, 40], g: [155, 35], b: [130, 30] },
+    leaf: { r: [50, 60], g: [100, 80], b: [15, 35] },
+    branchBlend: 50,
+  },
+  { // Maple — autumn palette, oranges and reds
+    w: 2,
+    angle: [0.35, 0.40], shrink: [0.48, 0.22], firstBranch: [0.20, 0.25],
+    leafCh: ['*', '\u2663', '#', '%', '@', '&'],
+    bark: { r: [85, 20], g: [50, 18], b: [25, 12] },
+    leaf: { r: [140, 100], g: [40, 70], b: [5, 25] },
+    branchBlend: 30,
+  },
+  { // Cherry — flowering pink/white blossoms, graceful
+    w: 1,
+    angle: [0.30, 0.35], shrink: [0.50, 0.20], firstBranch: [0.30, 0.20],
+    leafCh: ['*', '\u273F', '\u274B', '\u273F', '*', 'o'],
+    bark: { r: [90, 20], g: [55, 15], b: [40, 15] },
+    leaf: { r: [180, 70], g: [80, 80], b: [100, 80] },
+    branchBlend: 25,
+  },
+];
+
+const SPECIES_TOTAL_W = SPECIES.reduce((s, sp) => s + sp.w, 0);
+
+function pickSpecies(rng) {
+  let r = rng() * SPECIES_TOTAL_W;
+  for (const sp of SPECIES) {
+    r -= sp.w;
+    if (r <= 0) return sp;
+  }
+  return SPECIES[0];
+}
+
+const plants = [];
+let time = 0;
+let lastFrame = 0;
+let nextSpawn = 0.3;
+let seedNum = 1;
+
+// --- Generate all segments for one tree ---
+function generatePlant(baseCol, baseRow, seed) {
+  const rng = createRng(seed);
+  const segs = [];
+  let tMax = 0;
+
+  // Available height from ground to top of screen
+  const availH = baseRow - 1;
+
+  // Tree size class — occasional giants fill the full height
+  const roll = rng();
+  let hFrac;
+  if (roll < 0.10) {
+    hFrac = 0.80 + rng() * 0.15;   // 10%: giant (80-95%)
+  } else if (roll < 0.35) {
+    hFrac = 0.50 + rng() * 0.30;   // 25%: large (50-80%)
+  } else if (roll < 0.70) {
+    hFrac = 0.25 + rng() * 0.25;   // 35%: medium (25-50%)
+  } else {
+    hFrac = 0.10 + rng() * 0.15;   // 30%: small bush (10-25%)
+  }
+
+  const trunkLen = Math.max(4, Math.floor(availH * hFrac));
+
+  // Trunk width at the base scales with tree height
+  const baseWidth = trunkLen > 25 ? 3 : trunkLen > 12 ? 2 : 1;
+
+  // Pick a species for this tree
+  const sp = pickSpecies(rng);
+
+  // Per-tree growth parameters derived from species
+  const bAngle     = sp.angle[0] + rng() * sp.angle[1];
+  const shrink     = sp.shrink[0] + rng() * sp.shrink[1];
+  const lean       = (rng() - 0.5) * 0.06;
+  const firstBranch = sp.firstBranch[0] + rng() * sp.firstBranch[1];
+
+  function add(col, row, ch, r, g, b, t) {
+    if (segs.length >= MAX_SEGS) return;
+    segs.push({ col, row, ch, r, g, b, t });
+    if (t > tMax) tMax = t;
+  }
+
+  function grow(x, y, angle, len, depth, width, t0) {
+    if (depth > MAX_DEPTH || len < 1.5 || segs.length >= MAX_SEGS) return;
+
+    const steps = Math.round(len);
+
+    for (let i = 0; i < steps; i++) {
+      // Organic curvature: smooth oscillation layered with random jitter
+      angle += (rng() - 0.5) * 0.10 + Math.sin(i * 0.3 + depth * 1.7) * 0.025;
+
+      x += Math.sin(angle);
+      y -= Math.cos(angle);
+
+      // Width tapers toward the end of each branch
+      const progress = i / steps;
+      const taper = 1 - progress * 0.7;
+      const curW = Math.max(1, Math.round(width * taper));
+      const halfW = Math.floor(curW / 2);
+
+      const col = Math.round(x);
+      const row = Math.round(y);
+      const dn = Math.min(depth / MAX_DEPTH, 1);
+
+      // Draw this segment — potentially multi-character wide
+      for (let dx = -halfW; dx <= halfW; dx++) {
+        let ch;
+        if (curW <= 1) {
+          // Thin segment: single character
+          if (depth === 0) {
+            ch = BARK_CH[i % BARK_CH.length];
+          } else {
+            const sa = Math.sin(angle);
+            ch = Math.abs(sa) < 0.20 ? '\u2502' : (sa < 0 ? '/' : '\\');
+          }
+        } else if (dx === -halfW || dx === halfW) {
+          // Edges of thick segment
+          ch = '\u2502';
+        } else {
+          // Interior bark fill
+          ch = BARK_FILL[Math.floor(rng() * BARK_FILL.length)];
+        }
+
+        // Color: species bark at trunk, blending toward leaf tones at depth
+        const cr = Math.floor(sp.bark.r[0] * (1 - dn * 0.35) + rng() * sp.bark.r[1]);
+        const cg = Math.floor(sp.bark.g[0] + dn * sp.branchBlend + rng() * sp.bark.g[1]);
+        const cb = Math.floor(sp.bark.b[0] + rng() * sp.bark.b[1]);
+
+        // Outer columns appear later → trunk starts thin, then widens
+        add(col + dx, row, ch, cr, cg, cb, t0 + Math.abs(dx) * 0.5);
+      }
+
+      // Slight time variation per segment for organic pacing
+      t0 += SEG_TIME * (0.85 + rng() * 0.30);
+
+      // --- Branching logic ---
+      const canBranch = depth === 0
+        ? (progress > firstBranch && i > 2 && i < steps - 1)
+        : (i > 1 && i < steps - 1);
+
+      if (canBranch && depth < MAX_DEPTH - 2) {
+        // Branch probability rises toward the top of each segment
+        const branchProb = 0.12 + progress * 0.18 + (depth > 0 ? 0.06 : 0);
+
+        if (rng() < branchProb) {
+          const ba = bAngle + (rng() - 0.5) * 0.40;
+          const bLen = (steps - i) * shrink * (0.5 + rng() * 0.6);
+          const bW = Math.max(1, curW - 1);
+
+          // Asymmetric branching: sometimes one side, sometimes both
+          const side = rng();
+          if (side < 0.35) {
+            grow(x, y, angle - ba, bLen, depth + 1, bW, t0);
+          } else if (side < 0.70) {
+            grow(x, y, angle + ba, bLen, depth + 1, bW, t0);
+          } else {
+            grow(x, y, angle - ba, bLen, depth + 1, bW, t0);
+            grow(x, y, angle + ba * (0.5 + rng() * 0.7),
+                 bLen * (0.5 + rng() * 0.4), depth + 1, bW, t0);
+          }
+        }
+      }
+    }
+
+    // Terminal fork at the end of a branch
+    if (depth < MAX_DEPTH - 2 && len >= 3) {
+      const ba = bAngle + (rng() - 0.5) * 0.30;
+      const nLen = len * shrink;
+      const nW = Math.max(1, Math.round(width * 0.6));
+      grow(x, y, angle - ba, nLen, depth + 1, nW, t0);
+      if (rng() > 0.12) {
+        grow(x, y, angle + ba, nLen * (0.7 + rng() * 0.4), depth + 1, nW, t0);
+      }
+    }
+
+    // Dense canopy: many leaves at branch tips
+    if (depth >= MAX_DEPTH - 2 || len < 3) {
+      const spread = 2 + Math.floor(rng() * 3);
+      const nLeaves = 4 + Math.floor(rng() * 7);
+      for (let l = 0; l < nLeaves; l++) {
+        const lc = Math.round(x + (rng() - 0.5) * spread * 2);
+        const lr = Math.round(y - rng() * spread);
+        const ch = sp.leafCh[Math.floor(rng() * sp.leafCh.length)];
+        add(lc, lr, ch,
+          sp.leaf.r[0] + Math.floor(rng() * sp.leaf.r[1]),
+          sp.leaf.g[0] + Math.floor(rng() * sp.leaf.g[1]),
+          sp.leaf.b[0] + Math.floor(rng() * sp.leaf.b[1]),
+          t0 + l * 0.18 + rng() * 0.3
+        );
+      }
+    }
+  }
+
+  grow(baseCol, baseRow, lean, trunkLen, 0, baseWidth, 0);
+
+  return { segs, tMax, birth: time, baseCol };
+}
+
+// --- Spawn logic ---
+
+function canSpawnAt(col) {
+  for (const p of plants) {
+    if (Math.abs(p.baseCol - col) < MIN_SPACING) return false;
+  }
+  return true;
+}
+
+function spawnPlant() {
+  if (plants.length >= MAX_PLANTS) return;
+  for (let attempt = 0; attempt < 15; attempt++) {
+    const col = 3 + Math.floor(Math.random() * (cols - 6));
+    if (canSpawnAt(col)) {
+      const groundY = rows - GROUND_ROWS - 1;
+      plants.push(generatePlant(col, groundY, seedNum++));
+      return;
+    }
+  }
+}
+
+// --- Color string cache ---
+const colorCache = new Map();
+
+function rgbaStr(r, g, b, a) {
+  r &= 0xfc; g &= 0xfc; b &= 0xfc;
+  const aq = (a * 50 + 0.5) | 0;
+  const key = (r << 16) | (g << 8) | b | (aq << 24);
+  let s = colorCache.get(key);
+  if (s === undefined) {
+    s = 'rgba(' + r + ',' + g + ',' + b + ',' + (aq / 50).toFixed(2) + ')';
+    colorCache.set(key, s);
+    if (colorCache.size > 4096) {
+      const it = colorCache.keys();
+      for (let i = 0; i < 1024; i++) colorCache.delete(it.next().value);
+    }
+  }
+  return s;
+}
+
+// --- Main render loop ---
+
+function render(ts) {
+  if (!lastFrame) lastFrame = ts;
+  const dt = Math.min((ts - lastFrame) / 1000, 0.05);
+  lastFrame = ts;
+  time += dt;
+
+  // Spawn new trees periodically
+  if (time >= nextSpawn) {
+    spawnPlant();
+    nextSpawn = time + SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
+  }
+
+  // Clear
+  ctx.fillStyle = '#080a06';
+  ctx.fillRect(0, 0, W, H);
+  ctx.font = FONT;
+  ctx.textBaseline = 'top';
+
+  // Draw forest floor (3 rows at the bottom)
+  if (ground) {
+    for (let gi = 0; gi < GROUND_ROWS; gi++) {
+      const gy = (rows - GROUND_ROWS + gi) * CHAR_H;
+      const gRow = ground[gi];
+      for (let c = 0; c < cols && c < gRow.length; c++) {
+        const g = gRow[c];
+        ctx.fillStyle = rgbaStr(g.r, g.g, g.b, 0.45);
+        ctx.fillText(g.ch, c * CHAR_W, gy);
+      }
+    }
+  }
+
+  // Draw plants (oldest first so newer trees layer on top)
+  const toRemove = [];
+  for (let i = 0; i < plants.length; i++) {
+    const p = plants[i];
+    const age = time - p.birth;
+
+    // Fade alpha after MAX_AGE
+    let pAlpha = 1;
+    if (age > MAX_AGE) {
+      pAlpha = 1 - (age - MAX_AGE) / FADE_DUR;
+      if (pAlpha <= 0) {
+        toRemove.push(i);
+        continue;
+      }
+    }
+
+    // Draw each segment that has grown so far
+    for (const seg of p.segs) {
+      if (seg.t > age) continue;
+      if (seg.col < 0 || seg.col >= cols || seg.row < 0 || seg.row >= rows) continue;
+
+      const segAge = age - seg.t;
+      const growIn = Math.min(1, segAge / GROW_IN_DUR);
+      const a = pAlpha * growIn;
+      if (a < 0.01) continue;
+
+      // Tip glow: recently appeared segments are brighter
+      let sr = seg.r, sg = seg.g, sb = seg.b;
+      if (segAge < TIP_GLOW_DUR) {
+        const glow = 1 - segAge / TIP_GLOW_DUR;
+        sr = Math.min(255, sr + Math.floor(glow * 80));
+        sg = Math.min(255, sg + Math.floor(glow * 100));
+        sb = Math.min(255, sb + Math.floor(glow * 40));
+      }
+
+      // Growing point: show a dot first, then the real character
+      const ch = segAge < 0.15 ? '\u00B7' : seg.ch;
+
+      ctx.fillStyle = rgbaStr(sr, sg, sb, a);
+      ctx.fillText(ch, seg.col * CHAR_W, seg.row * CHAR_H);
+    }
+  }
+
+  // Remove fully faded trees (backward to keep indices stable)
+  for (let i = toRemove.length - 1; i >= 0; i--) {
+    plants.splice(toRemove[i], 1);
+  }
+
+  requestAnimationFrame(render);
+}
+
+// --- Init ---
+window.addEventListener('resize', resize);
+resize();
+requestAnimationFrame(render);
+</script>
+</body>
+</html>

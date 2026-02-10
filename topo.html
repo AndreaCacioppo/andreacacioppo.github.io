@@ -263,75 +263,79 @@ function terrainHeight(wx, wy, t) {
   return h;
 }
 
-// --- Heightmap buffer ---
-// We store the heightmap for the visible grid plus a buffer column on the right
-// for smooth scrolling. Heights are precomputed per column.
+// --- Heightmap buffer (circular) ---
+// Circular buffer avoids copying the entire array on each scroll step.
+// hmHead tracks which physical column index maps to logical column 0.
 
-let heightMap;     // Float32Array of size (cols+2) * rows
-let hmCols;        // number of columns in heightmap (cols + 2 for buffer)
+let hmBuf;         // Float32Array of size hmCols * rows (row-major)
+let hmCols;        // buffer width (cols + 3 for interpolation margin)
+let hmHead = 0;    // physical column of logical column 0
 
 // Fractional scroll position within a cell
 let subPixelX = 0;
 
-// The world-x coordinate of the leftmost heightmap column
+// The world-x coordinate of the leftmost logical column
 let worldLeftCol = 0;
 
-function heightMapIndex(c, r) {
-  return r * hmCols + c;
+function getHM(logicalCol, r) {
+  const physC = (hmHead + logicalCol) % hmCols;
+  return hmBuf[r * hmCols + physC];
 }
 
-function computeColumn(hmCol, worldX) {
+function computePhysCol(physC, worldX) {
   for (let r = 0; r < rows; r++) {
-    heightMap[heightMapIndex(hmCol, r)] = terrainHeight(worldX, r, evolveTime);
+    hmBuf[r * hmCols + physC] = terrainHeight(worldX, r, evolveTime);
   }
 }
 
 function initHeightMap() {
-  hmCols = cols + 2;
-  heightMap = new Float32Array(hmCols * rows);
+  hmCols = cols + 3;
+  hmBuf = new Float32Array(hmCols * rows);
+  hmHead = 0;
   worldLeftCol = Math.floor(scrollX);
   subPixelX = scrollX - worldLeftCol;
 
   for (let c = 0; c < hmCols; c++) {
-    computeColumn(c, worldLeftCol + c);
+    computePhysCol(c, worldLeftCol + c);
   }
 }
 
-// Shift heightmap left by one column and generate a new rightmost column
-function shiftHeightMap() {
-  // Shift all data left by one column
-  for (let r = 0; r < rows; r++) {
-    const rowStart = r * hmCols;
-    for (let c = 0; c < hmCols - 1; c++) {
-      heightMap[rowStart + c] = heightMap[rowStart + c + 1];
-    }
-  }
+// Advance by one cell: recycle the oldest column for the new rightmost one
+function advanceHeightMap() {
+  const recycled = hmHead;
   worldLeftCol++;
-  // Fill the rightmost column
-  computeColumn(hmCols - 1, worldLeftCol + hmCols - 1);
+  hmHead = (hmHead + 1) % hmCols;
+  computePhysCol(recycled, worldLeftCol + hmCols - 1);
 }
 
 // --- Contour and character selection ---
 
-// Number of contour levels
-const NUM_CONTOURS = 12;
+// Number of contour levels (more levels = smoother elevation transitions)
+const NUM_CONTOURS = 20;
 const CONTOUR_STEP = 1.0 / NUM_CONTOURS;
 
 // Characters for fill between contour lines, by elevation band (low to high)
-// Water zones use wave chars, lowlands use vegetation-like chars, highlands use rock/snow
 const fillChars = [
-  '~',    // 0  - deep water
-  '\u2248', // 1  - shallow water (≈)
-  ',',    // 2  - shoreline/marsh
-  ';',    // 3  - low grassland
-  '!',    // 4  - grassland
-  '\u00A7', // 5  - shrubland (§)
-  '%',    // 6  - forest
-  '#',    // 7  - dense forest / rocky
-  '=',    // 8  - rock face
-  '\u2593', // 9  - steep rock (▓)
-  '\u2592', // 10 - high altitude (▒)
-  '\u2588', // 11 - peak/snow (█)
+  '~',      // 0  - deep water
+  '~',      // 1  - deep water
+  '\u2248', // 2  - mid water (≈)
+  '\u2248', // 3  - shallow water (≈)
+  ',',      // 4  - shoreline
+  ',',      // 5  - marsh
+  ';',      // 6  - low grassland
+  ';',      // 7  - grassland
+  '!',      // 8  - tall grass
+  '\u00A7', // 9  - shrubland (§)
+  '%',      // 10 - light forest
+  '%',      // 11 - forest
+  '#',      // 12 - dense forest
+  '#',      // 13 - rocky
+  '=',      // 14 - rock face
+  '=',      // 15 - steep rock
+  '\u2593', // 16 - high rock (▓)
+  '\u2592', // 17 - high altitude (▒)
+  '\u2592', // 18 - near summit (▒)
+  '\u2588', // 19 - peak/snow (█)
 ];
 
 // Contour line characters
@@ -440,7 +444,7 @@ function resize() {
   CHAR_W = Math.round(FONT_SIZE * 0.77);
   CHAR_H = Math.round(FONT_SIZE * 1.23);
   FONT = `${FONT_SIZE}px "Courier New", monospace`;
-  cols = Math.ceil(W / CHAR_W) + 1;
+  cols = Math.ceil(W / CHAR_W) + 2; // extra column for sub-pixel scroll offset
   rows = Math.ceil(H / CHAR_H) + 1;
   initHeightMap();
 }
@@ -470,8 +474,9 @@ function rgbStr(r, g, b) {
 const SCROLL_SPEED = 2.0;    // cells per second of scrolling (~3.3x faster than before)
 const EVOLVE_SPEED = 0.012;  // how fast terrain changes over time
 
-// Band buffer to avoid re-allocating each frame
+// Pre-allocated buffers (re-sized in render if needed)
 let bandGrid;
+let interpHeights;
 
 function render(timestamp) {
   // Delta-time in seconds, capped to prevent huge jumps on tab-switch or lag
@@ -482,22 +487,22 @@ function render(timestamp) {
   time += dt;
   evolveTime += EVOLVE_SPEED * dt;
 
-  // Update scroll — sub-pixel accumulation for perfectly smooth motion
+  // Update scroll — sub-pixel accumulation
   subPixelX += SCROLL_SPEED * dt;
 
-  // If we've scrolled past a full cell, shift the heightmap
+  // Advance circular buffer when crossing a cell boundary
   while (subPixelX >= 1.0) {
     subPixelX -= 1.0;
-    shiftHeightMap();
+    advanceHeightMap();
   }
 
-  // Recompute the rightmost visible columns that may need updating
-  // due to terrain evolution. Only update a few columns per frame for performance.
-  // Update 2 columns per frame, cycling through all columns over time
-  const updateCol1 = (Math.floor(time * 30) % hmCols);
-  const updateCol2 = (updateCol1 + Math.floor(hmCols / 2)) % hmCols;
-  computeColumn(updateCol1, worldLeftCol + updateCol1);
-  computeColumn(updateCol2, worldLeftCol + updateCol2);
+  // Terrain evolution: update 3 columns per frame, evenly spaced across the buffer
+  const evoBase = Math.floor(time * 25) % hmCols;
+  for (let u = 0; u < 3; u++) {
+    const logCol = (evoBase + Math.floor(u * hmCols / 3)) % hmCols;
+    const physCol = (hmHead + logCol) % hmCols;
+    computePhysCol(physCol, worldLeftCol + logCol);
+  }
 
   // Clear canvas
   ctx.fillStyle = '#0a0a08';
@@ -505,55 +510,44 @@ function render(timestamp) {
   ctx.font = FONT;
   ctx.textBaseline = 'top';
 
-  // Compute band grid (which contour band each visible cell is in)
-  // We sample the heightmap with sub-pixel interpolation for smooth scrolling
-  if (!bandGrid || bandGrid.length < cols * rows) {
-    bandGrid = new Int32Array(cols * rows);
+  // Ensure buffers are large enough
+  const gridSize = cols * rows;
+  if (!bandGrid || bandGrid.length < gridSize) {
+    bandGrid = new Int32Array(gridSize);
+  }
+  if (!interpHeights || interpHeights.length < gridSize) {
+    interpHeights = new Float32Array(gridSize);
   }
 
-  // Also store interpolated heights for color lookup
-  const interpHeights = new Float32Array(cols * rows);
-
+  // Read heights and contour bands from circular buffer.
+  // Sub-pixel smoothness comes from the pixel offset (scrollOff) below,
+  // NOT from interpolating between heightmap columns — doing both
+  // would double-count the offset and cause a back-and-forth jitter.
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      // Map screen column to heightmap with sub-pixel offset
-      const hmX = c + subPixelX;
-      const hmC0 = Math.floor(hmX);
-      const hmC1 = hmC0 + 1;
-      const frac = hmX - hmC0;
-
-      // Bounds check
-      if (hmC0 < 0 || hmC1 >= hmCols) {
-        interpHeights[r * cols + c] = 0.5;
-        bandGrid[r * cols + c] = getContourBand(0.5);
-        continue;
-      }
-
-      const h0 = heightMap[heightMapIndex(hmC0, r)];
-      const h1 = heightMap[heightMapIndex(hmC1, r)];
-      const h = h0 + (h1 - h0) * frac;
-
+      const h = getHM(c, r);
       interpHeights[r * cols + c] = h;
       bandGrid[r * cols + c] = getContourBand(h);
     }
   }
 
+  // Sub-pixel scroll offset: shift character positions for perfectly smooth motion
+  const scrollOff = subPixelX * CHAR_W;
+
   // Render each cell
-  // Smooth scrolling is handled by interpolating heightmap data (hmX = c + subPixelX),
-  // so characters draw at their normal grid positions.
   for (let r = 0; r < rows; r++) {
     const py = r * CHAR_H;
     if (py > H) break;
 
     for (let c = 0; c < cols; c++) {
-      const px = c * CHAR_W;
-      if (px > W) break;
+      const px = c * CHAR_W - scrollOff;
+      if (px > W || px < -CHAR_W) continue;
 
       const idx = r * cols + c;
       const h = interpHeights[idx];
       const band = bandGrid[idx];
 
-      // Get neighbor bands for contour detection (clamp at edges)
+      // Neighbor bands for contour character selection
       const bandL = c > 0 ? bandGrid[idx - 1] : band;
       const bandR = c < cols - 1 ? bandGrid[idx + 1] : band;
       const bandU = r > 0 ? bandGrid[idx - cols] : band;
@@ -561,29 +555,30 @@ function render(timestamp) {
 
       const cChar = contourChar(band, bandL, bandR, bandU, bandD);
 
-      let ch, isContour;
-      if (cChar !== null) {
+      // Soft contour blending: brightness fades smoothly near contour lines
+      // instead of popping between full-bright and dim
+      const hScaled = h * NUM_CONTOURS;
+      const distToLine = Math.abs(hScaled - Math.round(hScaled)); // 0 at contour, 0.5 at mid-band
+      const SOFT_WIDTH = 0.38;
+      const rawBlend = Math.max(0, 1 - distToLine / SOFT_WIDTH);
+      // Smoothstep for natural falloff
+      const cBlend = rawBlend * rawBlend * (3 - 2 * rawBlend);
+
+      // Contour character when blend is strong enough, otherwise fill
+      let ch;
+      if (cChar !== null && cBlend > 0.08) {
         ch = cChar;
-        isContour = true;
       } else {
         ch = fillChars[Math.min(fillChars.length - 1, band)];
-        isContour = false;
       }
 
-      // Get terrain color
+      // Get terrain color, then blend between fill and contour brightness
       let [cr, cg, cb] = getTerrainColor(h);
-
-      if (isContour) {
-        // Contour lines are significantly brighter — the defining feature of a topo map
-        cr = Math.min(255, (cr * 1.8 + 50) | 0);
-        cg = Math.min(255, (cg * 1.8 + 50) | 0);
-        cb = Math.min(255, (cb * 1.8 + 50) | 0);
-      } else {
-        // Fill characters at moderate brightness
-        cr = (cr * 0.8) | 0;
-        cg = (cg * 0.8) | 0;
-        cb = (cb * 0.8) | 0;
-      }
+      const mul = 0.8 + 1.0 * cBlend;   // 0.8 (fill) → 1.8 (contour)
+      const add = 50 * cBlend;            // 0 (fill) → 50 (contour)
+      cr = Math.min(255, (cr * mul + add) | 0);
+      cg = Math.min(255, (cg * mul + add) | 0);
+      cb = Math.min(255, (cb * mul + add) | 0);
 
       ctx.fillStyle = rgbStr(cr, cg, cb);
       ctx.fillText(ch, px, py);

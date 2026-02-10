@@ -36,7 +36,12 @@
   </url>
   <url>
     <loc>https://andreacacioppo.com/fractal.html</loc>
-    <lastmod>2026-02-09</lastmod>
+    <lastmod>2026-02-10</lastmod>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://andreacacioppo.com/tree.html</loc>
+    <lastmod>2026-02-10</lastmod>
     <priority>0.4</priority>
   </url>
 </urlset>
