@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>life</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080604; overflow: hidden; }
+  canvas { display: block; }
+
+  .nav-link {
+    position: fixed;
+    top: 2rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(8, 6, 4, 0.75);
+    border: 1px solid rgba(120, 70, 30, 0.25);
+    color: rgba(180, 110, 50, 0.65);
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-link:hover,
+  .nav-link:focus-visible {
+    color: rgba(220, 150, 60, 0.9);
+    border-color: rgba(180, 100, 40, 0.45);
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .nav-link:hover svg {
+    filter: drop-shadow(0 0 6px rgba(200, 120, 40, 0.5));
+  }
+
+  .nav-link:active {
+    transform: translateY(0);
+  }
+
+  .nav-link svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: filter 200ms ease;
+  }
+
+  .nav-back { left: 2rem; }
+
+  @media (max-width: 600px) {
+    .nav-link { top: 1.2rem; }
+    .nav-back { left: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+<a class="nav-link nav-back" href="/tree.html" aria-label="back to tree">
+  <svg viewBox="0 0 24 24" stroke-width="1.4">
+    <line x1="12" y1="22" x2="12" y2="8"/>
+    <path d="M12 15 L7 10"/>
+    <path d="M12 15 L17 10"/>
+    <path d="M12 10 L9 5"/>
+    <path d="M12 10 L15 5"/>
+    <path d="M7 10 L4 5"/>
+    <path d="M17 10 L20 5"/>
+  </svg>
+</a>
+
+<canvas id="c"></canvas>
+
+<script>
+// Conway's Game of Life — ASCII-rendered on canvas with mouse interaction
+// Uses a dual-buffer system, cell aging for color gradients, and
+// wraparound (toroidal) topology.
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// ── Grid setup ──────────────────────────────────────────────────────
+const CHAR_W = 8;
+const CHAR_H = 14;
+let cols, rows;
+let gridA, gridB;   // dual buffers: gridA = current, gridB = next
+let ageGrid;        // tracks how many generations each cell has been alive
+let generation = 0;
+
+// ── State ───────────────────────────────────────────────────────────
+let playing = true;
+let speedMultiplier = 1;
+const speeds = [1, 2, 4, 8, 16];
+let speedIdx = 0;
+let accumulator = 0;
+const BASE_INTERVAL = 100;
+
+// ── Patterns ────────────────────────────────────────────────────────
+const PATTERNS = {
+  glider: [[0,1],[1,2],[2,0],[2,1],[2,2]],
+  lwss: [[0,1],[0,3],[1,0],[2,0],[2,4],[3,0],[3,1],[3,2],[3,3]],
+  pulsar: (function() {
+    const q = [[1,2],[1,3],[1,4],[2,1],[3,1],[4,1],[2,6],[3,6],[4,6],[6,2],[6,3],[6,4]];
+    const full = [];
+    for (const [r,c] of q) {
+      full.push([r,c],[r,12-c],[12-r,c],[12-r,12-c]);
+    }
+    const set = new Set(full.map(p => p[0]+','+p[1]));
+    return [...set].map(s => s.split(',').map(Number));
+  })(),
+  gosperGun: [
+    [0,24],[1,22],[1,24],[2,12],[2,13],[2,20],[2,21],[2,34],[2,35],
+    [3,11],[3,15],[3,20],[3,21],[3,34],[3,35],[4,0],[4,1],[4,10],
+    [4,16],[4,20],[4,21],[5,0],[5,1],[5,10],[5,14],[5,16],[5,17],
+    [5,22],[5,24],[6,10],[6,16],[6,24],[7,11],[7,15],[8,12],[8,13]
+  ],
+  rpentomino: [[0,1],[0,2],[1,0],[1,1],[2,1]],
+  acorn: [[0,1],[1,3],[2,0],[2,1],[2,4],[2,5],[2,6]],
+  diehard: [[0,6],[1,0],[1,1],[2,1],[2,5],[2,6],[2,7]]
+};
+
+// ── ASCII character sets for cell rendering ─────────────────────────
+const ALIVE_CHARS = ['.', '·', ':', '+', '*', '#', '█', '▓', '▒', '░'];
+
+// ── Color palette: golden/reddish — young cells bright gold, aging to deep red ──
+function cellColor(age) {
+  if (age <= 0) return null;
+  const t = Math.min(age / 80, 1);
+  // Bright gold → Orange → Deep crimson
+  const r = Math.floor(240 - 80 * t);
+  const g = Math.floor(180 - 150 * t);
+  const b = Math.floor(40 + 20 * t);
+  const a = 0.55 + 0.45 * (1 - t * 0.5);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+// Ghost grid for recently died cells
+let ghostGrid;
+
+// ── Zoom & pan ──────────────────────────────────────────────────────
+let zoomLevel = 1;
+let panX = 0, panY = 0;
+let isPanning = false;
+let panStartX, panStartY, panStartPanX, panStartPanY;
+
+// ── Initialize ──────────────────────────────────────────────────────
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cols = Math.ceil(canvas.width / (CHAR_W * zoomLevel)) + 2;
+  rows = Math.ceil(canvas.height / (CHAR_H * zoomLevel)) + 2;
+  rebuildGrids();
+}
+
+function rebuildGrids() {
+  gridA = new Uint8Array(cols * rows);
+  gridB = new Uint8Array(cols * rows);
+  ageGrid = new Int16Array(cols * rows);
+  ghostGrid = new Uint8Array(cols * rows);
+}
+
+function idx(x, y) {
+  const wx = ((x % cols) + cols) % cols;
+  const wy = ((y % rows) + rows) % rows;
+  return wy * cols + wx;
+}
+
+function setCell(x, y, val) {
+  const i = idx(x, y);
+  gridA[i] = val;
+  ageGrid[i] = val ? 1 : 0;
+}
+
+function countNeighbors(x, y) {
+  let count = 0;
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      count += gridA[idx(x + dx, y + dy)];
+    }
+  }
+  return count;
+}
+
+// ── Step simulation ─────────────────────────────────────────────────
+function step() {
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const i = y * cols + x;
+      const n = countNeighbors(x, y);
+      const alive = gridA[i];
+
+      if (alive) {
+        gridB[i] = (n === 2 || n === 3) ? 1 : 0;
+      } else {
+        gridB[i] = (n === 3) ? 1 : 0;
+      }
+
+      if (gridB[i]) {
+        ageGrid[i] = alive ? ageGrid[i] + 1 : 1;
+        ghostGrid[i] = 0;
+      } else {
+        if (alive) ghostGrid[i] = 12;
+        else if (ghostGrid[i] > 0) ghostGrid[i]--;
+        ageGrid[i] = 0;
+      }
+    }
+  }
+
+  const tmp = gridA;
+  gridA = gridB;
+  gridB = tmp;
+  generation++;
+}
+
+// ── Render ──────────────────────────────────────────────────────────
+function render() {
+  ctx.fillStyle = '#080604';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cw = CHAR_W * zoomLevel;
+  const ch = CHAR_H * zoomLevel;
+  const fontSize = Math.max(8, Math.floor(12 * zoomLevel));
+  ctx.font = `${fontSize}px 'Courier New', monospace`;
+  ctx.textBaseline = 'top';
+
+  const offsetX = panX % cw;
+  const offsetY = panY % ch;
+  const startCol = Math.floor(-panX / cw);
+  const startRow = Math.floor(-panY / ch);
+  const visCols = Math.ceil(canvas.width / cw) + 1;
+  const visRows = Math.ceil(canvas.height / ch) + 1;
+
+  for (let vy = 0; vy < visRows; vy++) {
+    for (let vx = 0; vx < visCols; vx++) {
+      const gx = startCol + vx;
+      const gy = startRow + vy;
+      const i = idx(gx, gy);
+      const screenX = vx * cw + offsetX;
+      const screenY = vy * ch + offsetY;
+
+      if (gridA[i]) {
+        const age = ageGrid[i];
+        const charIdx = Math.min(age, ALIVE_CHARS.length - 1);
+        ctx.fillStyle = cellColor(age);
+        ctx.fillText(ALIVE_CHARS[charIdx], screenX, screenY);
+      } else if (ghostGrid[i] > 0) {
+        const ghostAlpha = ghostGrid[i] / 12 * 0.15;
+        ctx.fillStyle = `rgba(100, 60, 30, ${ghostAlpha})`;
+        ctx.fillText('·', screenX, screenY);
+      } else {
+        if ((((gx * 7 + gy * 13) & 0xFF) < 8)) {
+          ctx.fillStyle = 'rgba(60, 40, 20, 0.12)';
+          ctx.fillText('·', screenX, screenY);
+        }
+      }
+    }
+  }
+}
+
+// ── Mouse interaction ───────────────────────────────────────────────
+let isDrawing = false;
+let drawValue = 1;
+
+function screenToGrid(sx, sy) {
+  const cw = CHAR_W * zoomLevel;
+  const ch = CHAR_H * zoomLevel;
+  return [Math.floor((sx - panX) / cw), Math.floor((sy - panY) / ch)];
+}
+
+canvas.addEventListener('mousedown', (e) => {
+  if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+    isPanning = true;
+    panStartX = e.clientX;
+    panStartY = e.clientY;
+    panStartPanX = panX;
+    panStartPanY = panY;
+    return;
+  }
+
+  const [gx, gy] = screenToGrid(e.clientX, e.clientY);
+  isDrawing = true;
+  drawValue = gridA[idx(gx, gy)] ? 0 : 1;
+  setCell(gx, gy, drawValue);
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (isPanning) {
+    panX = panStartPanX + (e.clientX - panStartX);
+    panY = panStartPanY + (e.clientY - panStartY);
+    return;
+  }
+  if (isDrawing) {
+    const [gx, gy] = screenToGrid(e.clientX, e.clientY);
+    setCell(gx, gy, drawValue);
+  }
+});
+
+canvas.addEventListener('mouseup', () => { isDrawing = false; isPanning = false; });
+canvas.addEventListener('mouseleave', () => { isDrawing = false; isPanning = false; });
+
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const oldZoom = zoomLevel;
+  if (e.deltaY < 0) zoomLevel = Math.min(zoomLevel * 1.15, 5);
+  else zoomLevel = Math.max(zoomLevel / 1.15, 0.3);
+  const mx = e.clientX, my = e.clientY;
+  panX = mx - (mx - panX) * (zoomLevel / oldZoom);
+  panY = my - (my - panY) * (zoomLevel / oldZoom);
+}, { passive: false });
+
+// Touch support
+let lastTouchDist = null;
+canvas.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    lastTouchDist = Math.sqrt(dx*dx + dy*dy);
+    return;
+  }
+  if (e.touches.length === 1) {
+    const t = e.touches[0];
+    const [gx, gy] = screenToGrid(t.clientX, t.clientY);
+    isDrawing = true;
+    drawValue = gridA[idx(gx, gy)] ? 0 : 1;
+    setCell(gx, gy, drawValue);
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && lastTouchDist !== null) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    zoomLevel = Math.max(0.3, Math.min(5, zoomLevel * (dist / lastTouchDist)));
+    lastTouchDist = dist;
+    return;
+  }
+  if (isDrawing && e.touches.length === 1) {
+    const t = e.touches[0];
+    const [gx, gy] = screenToGrid(t.clientX, t.clientY);
+    setCell(gx, gy, drawValue);
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchend', () => { isDrawing = false; lastTouchDist = null; });
+
+// ── Keyboard shortcuts (discoverable by the curious) ────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ') { e.preventDefault(); playing = !playing; }
+  if (e.key === 's') { if (!playing) step(); }
+  if (e.key === 'c') { gridA.fill(0); ageGrid.fill(0); ghostGrid.fill(0); generation = 0; }
+  if (e.key === 'r') {
+    for (let i = 0; i < gridA.length; i++) {
+      gridA[i] = Math.random() < 0.2 ? 1 : 0;
+      ageGrid[i] = gridA[i] ? 1 : 0;
+      ghostGrid[i] = 0;
+    }
+    generation = 0;
+  }
+  if (e.key === '+' || e.key === '=') {
+    speedIdx = Math.min(speedIdx + 1, speeds.length - 1);
+    speedMultiplier = speeds[speedIdx];
+  }
+  if (e.key === '-') {
+    speedIdx = Math.max(speedIdx - 1, 0);
+    speedMultiplier = speeds[speedIdx];
+  }
+});
+
+// ── Main loop ───────────────────────────────────────────────────────
+let lastTime = 0;
+
+function loop(timestamp) {
+  const dt = timestamp - lastTime;
+  lastTime = timestamp;
+
+  if (playing) {
+    accumulator += dt * speedMultiplier;
+    while (accumulator >= BASE_INTERVAL) {
+      step();
+      accumulator -= BASE_INTERVAL;
+    }
+  }
+
+  render();
+  requestAnimationFrame(loop);
+}
+
+// ── Boot ────────────────────────────────────────────────────────────
+window.addEventListener('resize', resize);
+resize();
+
+// Seed with patterns
+(function seedInitial() {
+  const cx = Math.floor(cols / 2) - 20;
+  const cy = Math.floor(rows / 2) - 5;
+  for (const [pr, pc] of PATTERNS.gosperGun) {
+    setCell(cx + pc, cy + pr, 1);
+  }
+  for (let i = 0; i < 5; i++) {
+    const gx = Math.floor(Math.random() * cols * 0.8 + cols * 0.1);
+    const gy = Math.floor(Math.random() * rows * 0.8 + rows * 0.1);
+    for (const [pr, pc] of PATTERNS.glider) {
+      setCell(gx + pc, gy + pr, 1);
+    }
+  }
+})();
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
