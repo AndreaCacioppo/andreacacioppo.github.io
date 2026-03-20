@@ -4,3 +4,7 @@ Allow: /
 # GitHub Pages sitemap
 Sitemap: https://andreacacioppo.com/sitemap.xml
 
+# LLM-readable summary
+# See https://llmstxt.org
+LLMs-txt: https://andreacacioppo.com/llms.txt
+

@@ -1,0 +1,29 @@
+# Andrea Cacioppo
+
+## About
+Physicist and Machine Learning Researcher with 6+ years of experience across academia and industry.
+Currently Researcher at Italy's Istituto Superiore di Sanità (Dept. of Food Safety, Nutrition and Veterinary Public Health).
+Finishing PhD in Physics at Sapienza University of Rome.
+
+## Expertise
+- Machine Learning & Deep Learning (PyTorch, neural networks, diffusion models)
+- Quantum Computing & Quantum Machine Learning
+- Anomaly Detection & Time Series Analysis
+- LiDAR and satellite data processing
+- Graph Neural Networks
+- Information Theory
+
+## Education
+- PhD in Physics (expected 2026), Sapienza University of Rome
+- M.Sc. in Physics, Sapienza University of Rome (109/110)
+- B.Sc. in Physics, Sapienza University of Rome (110/110 with honors)
+
+## Selected Publications
+- "Hybrid and hardware-oriented approaches for quantum diffusion models" (IJCNN 2025)
+- "Quantum Diffusion Models" (arXiv, 2023)
+- "Compound Channel Capacities under Energy Constraints" (IEEE ISIT, 2021)
+
+## Links
+- Website: https://andreacacioppo.com/
+- LinkedIn: https://www.linkedin.com/in/andrea-cacioppo/
+- CV (PDF): https://andreacacioppo.com/curriculum/ACacioppo_CV.pdf
