@@ -18,10 +18,12 @@ Finishing PhD in Physics at Sapienza University of Rome.
 - M.Sc. in Physics, Sapienza University of Rome (109/110)
 - B.Sc. in Physics, Sapienza University of Rome (110/110 with honors)
 
-## Selected Publications
-- "Hybrid and hardware-oriented approaches for quantum diffusion models" (IJCNN 2025)
-- "Quantum Diffusion Models" (arXiv, 2023)
-- "Compound Channel Capacities under Energy Constraints" (IEEE ISIT, 2021)
+## Publications
+- Andrea Cacioppo, Lorenzo Colantonio, Simone Bordoni, and Stefano Giagu. "Hybrid and hardware-oriented approaches for quantum diffusion models". In 2025 International Joint Conference on Neural Networks (IJCNN), 2025.
+- Lorenzo Colantonio, Andrea Cacioppo, Federico Scarpati, and Stefano Giagu. "Efficient graph coloring with neural networks: A physics-inspired approach for large graphs". arXiv preprint arXiv:2408.01503, 2024.
+- Andrea Cacioppo, Lorenzo Colantonio, Simone Bordoni, and Stefano Giagu. "Quantum Diffusion Models". arXiv preprint arXiv:2311.15444, 2023.
+- Andrea Cacioppo, Janis Nötzel, and Matteo Rosati. "Compound Channel Capacities under Energy Constraints and Application". In 2021 IEEE International Symposium on Information Theory (ISIT), pages 640–645. IEEE, 2021.
+- Andrea Cacioppo. "Deep learning for the parameter estimation of tight-binding Hamiltonians". Master's thesis, Sapienza Università di Roma, Italy, 2020.
 
 ## Links
 - Website: https://andreacacioppo.com/
